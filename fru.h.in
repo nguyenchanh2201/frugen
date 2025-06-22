@@ -651,8 +651,8 @@ bool fru_setfield(fru_field_t * field,
  *
  * @param[in, out] field     Pointer to a decoded field (typically inside a
  *                           member of fru_t)
- * @param[in]      encoding  Desired encoding.
- * @param[in]      string    The input string to set the field to.
+ * @param[in]      buf       The source binary buffer
+ * @param[in]      size      The source buffer size in bytes
  * @returns Success status
  * @retval true Success, check \ref fru_errno.code for \ref FE2BIG to
  *              see if data was truncated
@@ -660,9 +660,9 @@ bool fru_setfield(fru_field_t * field,
  *
  * @ingroup infocommon
  */
-bool fru_setfield(fru_field_t * field,
-                  fru_field_enc_t encoding,
-                  const char * string);
+bool fru_setfield_binary(fru_field_t * field,
+                         const void * buf,
+                         size_t size);
 
 /**
  * @brief Get a pointer to a mandatory field in the info area of the
@@ -1486,7 +1486,6 @@ fru_mr_rec_t * fru_add_mr(fru_t * fru, size_t index, fru_mr_rec_t * rec);
  * @param[in] index Index of the record to fetch from the the MR record list
  *                  Specify \ref FRU_LIST_HEAD to get the first record
  *                  or to check whether the list is empty.
- * @param[in] index Index of the MultiRecord area record to fetch
  *
  * @returns A pointer to the found record inside the MR area
  * @retval NULL Failure, sets \ref fru_errno

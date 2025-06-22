@@ -75,7 +75,7 @@ typedef enum {
 } fru_error_source_t;
 
 typedef struct {
-	fru_error_code_t code;
+	fru_error_code_t code; /**< The error code */
 	fru_error_source_t src; /**< The source of error */
 	int index; /**< Index of the offending entity within the source, that is, an
 	            *   index of a field (for FRU_*_INFO) or a record (for FRU_MR).
