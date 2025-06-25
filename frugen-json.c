@@ -462,7 +462,7 @@ void frugen_loadfile_json(fru_t * fru, const char * fname)
 	fru_area_type_t atype;
 	FRU_FOREACH_AREA(atype) {
 		json_object * jso;
-		if (!json_object_object_get_ex(jstree, area_names[atype].json, &jso)) {
+		if (!json_object_object_get_ex(jstree, area_names[atype].json, &jso) || !jso) {
 			debug(2, "%s Area ('%s') is not found in JSON",
 			      area_names[atype].human, area_names[atype].json);
 			continue;
