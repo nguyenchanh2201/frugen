@@ -4,6 +4,7 @@
  *  Copyright (C) 2016-2021 Alexander Amelkin <alexander@amelkin.msk.ru>
  *  SPDX-License-Identifier: LGPL-2.0-or-later OR Apache-2.0
  */
+#include <errno.h>
 #include <string.h>
 #include "../fru_errno.h"
 
@@ -52,7 +53,7 @@ const char * fru_strerr(fru_errno_t ferr)
 	}
 
 	if (ferr.code == FEGENERIC)
-		return strerror(ferr.code);
+		return strerror(errno);
 
 	return fru_errno_string[ferr.code];
 }
