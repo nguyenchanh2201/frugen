@@ -273,6 +273,12 @@ bool encode_iu_area(void * area_out, size_t * size,
 	fru__file_internal_t * internal = area_out;
 	size_t bytesize = 0;
 
+	if (!fru->internal) {
+		fru__seterr(FEGENERIC, FERR_LOC_INTERNAL, -1);
+		errno = EFAULT;
+		return false;
+	}
+
 	if (internal) {
 		if (!fru__hexstr2bin(internal->data, &bytesize, FRU__HEX_RELAXED, fru->internal)) {
 			fru_errno.src = (fru_error_source_t)FERR_LOC_INTERNAL;
