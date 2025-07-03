@@ -1,5 +1,4 @@
 
-
 # frugen / libfru
 
 ## License
@@ -21,6 +20,9 @@ full compliance with [IPMI FRU Information Storage Definition v1.0, rev. 1.3.](h
 
 
 ## libfru
+
+The full developer's documentation for the library is available at
+https://ipmitool.codeberg.page/frugen/
 
 This is the library behind frugen. It is aimed at providing a very easy-to-use
 API that completely (well, almost) abstracts the user from the details of the
