@@ -56,14 +56,6 @@ bool mr_blob2rec(fru__file_mr_rec_t * rec,
 
 	memcpy(local_rec->data, blob, FRU_MIN(FRU__FILE_MRR_MAXDATA, len));
 
-	// Checksum the data
-	int cksum = fru__calc_checksum(local_rec->data, len);
-	if (cksum < 0) {
-		fru_errno.src = (fru_error_source_t)FERR_LOC_MR;
-		return false;
-	}
-	local_rec->hdr.rec_checksum = (uint8_t)cksum;
-
 	*size = sizeof(*local_rec) + local_rec->hdr.len;
 	if (rec) {
 		memcpy(rec, local_rec, *size);
@@ -108,8 +100,6 @@ bool mgmt_blob2rec(fru__file_mr_rec_t * rec,
 	/* Now pack it into a generic MR record starting with the subtype byte */
 	return mr_blob2rec(rec, size, &local_rec->subtype, len + 1, FRU_MR_MGMT_ACCESS);
 }
-
-
 
 /**
  * Take an input string, check that it looks like UUID, and pack it into
@@ -246,13 +236,17 @@ bool encode_mr_record(void * outbuf, size_t * size, fru_mr_rec_t * rec, bool las
 	bool rc = encode_rec[rec->type](outbuf, &bytes, rec);
 	/* Update the header checksum and set the EOL flag if needed */
 	if (outbuf && rc) {
-		fru__file_mr_header_t * hdr = outbuf;
+		fru__file_mr_rec_t * const file_rec = outbuf;
+		fru__file_mr_header_t * const hdr = &file_rec->hdr;
 		int cksum;
-
 
 		if (last) {
 			hdr->eol_ver |= FRU__MR_EOL;
 		}
+
+		// Checksum the data
+		cksum = fru__calc_checksum(file_rec->data, hdr->len);
+		hdr->rec_checksum = (uint8_t)cksum;
 
 		/* Checksum the header, don't include the checksum byte itself */
 		cksum = fru__calc_checksum(hdr, sizeof(*hdr) - 1); // Can't fail here
