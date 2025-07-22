@@ -686,11 +686,11 @@ void add_mr_area_json(struct json_object * jso,
 
 	/* Add each MR record */
 	fru_mr_rec_t *rec = NULL;
-	size_t count = 0;
+	size_t index = FRU_LIST_HEAD;
 	while (true) {
 		bool last = false;
 		fru_clearerr();
-		rec = fru_get_mr(fru, FRU_LIST_HEAD);
+		rec = fru_get_mr(fru, index);
 		last = (fru_errno.code == FEMREND);
 
 		if (!rec) {
@@ -698,13 +698,13 @@ void add_mr_area_json(struct json_object * jso,
 		}
 
 		add_mr_record_json(js_mr, rec);
-		count++;
+		index++;
 
 		if (last)
 			break;
 	}
 
-	if (count) {
+	if (FRU_LIST_HEAD != index) {
 		json_object_object_add(jso, "multirecord", js_mr);
 		debug(2, "Added multirecord area to JSON");
 	}
