@@ -507,7 +507,7 @@ bool decode_mr_mgmt(fru_mr_rec_t * rec,
 	}
 
 	/* All other records are just plain text */
-	memcpy(rec->mgmt.data, file_rec->data, file_rec->hdr.len);
+	memcpy(rec->mgmt.data, file_rec->data, file_rec->hdr.len - sizeof(file_rec->subtype));
 	rec->mgmt.subtype = file_rec->subtype;
 
 	return true;
