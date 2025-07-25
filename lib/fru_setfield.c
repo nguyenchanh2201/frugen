@@ -292,10 +292,16 @@ bool encode_text(fru__file_field_t * out,
 		if (out->typelen == FRU__FIELD_TERMINATOR)
 			out->typelen++;
 
+		size_t max_i = FRU__FIELDLEN(out->typelen) - 1;
+
 		// We don't want the nul-byte in the destination
 		// unless it's a single-byte string
-		for (size_t i = 0; i < FRU__FIELDLEN(out->typelen); i++) {
-			if (!isprint(s[i])) {
+		for (size_t i = 0; i <= max_i; i++) {
+			// The only non-printable character we allow is the
+			// nul-byte at the last position of the string as
+			// we may have added it earlier ourselves to avoid
+			// typelen being equal to FRU__FIELD_TERMINATOR
+			if ((s[i] || i != max_i) && !isprint(s[i])) {
 				fru__seterr(FENONPRINT, FERR_LOC_GENERAL, -1);
 				return false;
 			}
