@@ -111,7 +111,7 @@ typedef struct {
  *
  * Please also see \ref fru_strerr()
  */
-extern __thread fru_errno_t fru_errno;
+extern thread_local fru_errno_t fru_errno;
 
 /**
  * @brief Get a description of the given \p fru_errno value.
