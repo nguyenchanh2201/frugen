@@ -52,6 +52,6 @@ fru_mr_rec_t * fru_add_mr(fru_t * fru, size_t index, fru_mr_rec_t * rec)
 	}
 
 	mr_reclist_tail->rec = newrec;
-	fru->present[FRU_MR] = true;
+	fru_enable_area(fru, FRU_MR, FRU_APOS_AUTO);
 	return newrec;
 }
