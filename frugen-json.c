@@ -126,7 +126,7 @@ bool load_info_fields(fru_t * fru, fru_area_type_t atype,
 	size_t field_idx = FRU_LIST_HEAD;
 	fru_field_t * field;
 	int infoidx = FRU_ATYPE_TO_INFOIDX(atype);
-	while ((field = fru_getfield(fru, atype, field_idx))) {
+	while (infoidx >= 0 && (field = fru_getfield(fru, atype, field_idx))) {
 		const char * jsname = jsnames[infoidx][field_idx];
 		if (!json_object_object_get_ex(jso, jsname, &jsfield)) {
 			debug(2, "Field '%s' not found for area '%s', skipping",
@@ -277,6 +277,7 @@ bool load_mr_raw_record(fru_t * fru,
 	if (!ifield || !hexstr) {
 		warn("A custom MR record must have 'data' "
 		     "field with a hex string");
+		goto out;
 	}
 
 	fru_mr_rec_t mr_rec = {

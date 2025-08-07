@@ -8,6 +8,7 @@
  */
 #include <assert.h>
 #include <ctype.h>
+#include <endian.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stddef.h>
@@ -84,9 +85,16 @@ bool mgmt_blob2rec(fru__file_mr_rec_t * rec,
 	size_t min, max;
 	uint8_t mgmt_blob[sizeof(fru__file_mr_mgmt_rec_t) + FRU__FILE_MR_MGMT_MAXDATA] = {};
 	fru__file_mr_mgmt_rec_t * local_rec = (fru__file_mr_mgmt_rec_t *)mgmt_blob;
+	off_t subtype_idx = FRU_MR_MGMT_SUBTYPE_TO_IDX(subtype);
 
-	min = fru__mr_mgmt_minlen[FRU_MR_MGMT_SUBTYPE_TO_IDX(subtype)];
-	max = fru__mr_mgmt_maxlen[FRU_MR_MGMT_SUBTYPE_TO_IDX(subtype)];
+	if (subtype_idx < 0) {
+		// This can't happen here, but we still
+		// check to make static analyzers happy
+		fru__seterr(FEMRMGMTBAD, FERR_LOC_MR, -1);
+		return false;
+	}
+	min = fru__mr_mgmt_minlen[subtype_idx];
+	max = fru__mr_mgmt_maxlen[subtype_idx];
 
 	if (min > len || len > max || len > FRU__FILE_MR_MGMT_MAXDATA) {
 		fru__seterr(FESIZE, FERR_LOC_MR, -1);
@@ -677,17 +685,20 @@ bool fru_savefile(const char * fname, const fru_t * fru)
 {
 	fru__file_t * frufile = NULL;
 	size_t frufile_size = 0;
+	bool rc = false;
+	int fd = -1;
 
 	if (!fname || !fru) {
 		fru__seterr(FEGENERIC, FERR_LOC_GENERAL, -1);
 		errno = EFAULT;
+		goto out;
 	}
 
 	if (!fru_savebuffer((void **)&frufile, &frufile_size, fru)) {
-		return false;
+		goto out;
 	}
 
-	int fd = open(fname,
+	fd = open(fname,
 #if __WIN32__ || __WIN64__
 			  O_CREAT | O_TRUNC | O_WRONLY | O_BINARY,
 #else
@@ -698,7 +709,7 @@ bool fru_savefile(const char * fname, const fru_t * fru)
 	if (fd < 0) {
 		DEBUG("Couldn't create file %s: %m", fname);
 		fru__seterr(FEGENERIC, FERR_LOC_GENERAL, -1);
-		return false;
+		goto out;
 	}
 
 	size_t written = 0;
@@ -709,12 +720,15 @@ bool fru_savefile(const char * fname, const fru_t * fru)
 				continue;
 			fru__seterr(FEGENERIC, FERR_LOC_GENERAL, -1);
 			DEBUG("Couldn't write to %s: %m", fname);
-			return false;
+			goto out;
 		}
 		written += rc;
 	}
 
-	free(frufile);
-	close(fd);
-	return true;
+	rc = true;
+out:
+	zfree(frufile);
+	if (fd >= 0)
+		close(fd);
+	return rc;
 }

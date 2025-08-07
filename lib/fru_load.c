@@ -7,9 +7,12 @@
  *  SPDX-License-Identifier: GPL-2.0-or-later OR Apache-2.0
  */
 
+#define _DEFAULT_SOURCE
+
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <endian.h>
 #include <fcntl.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -255,18 +258,21 @@ bool decode_info_area(fru_t * fru,
                       fru_flags_t flags)
 {
 	const fru__file_area_t * file_area = data_in;
-	int bytes_left = FRU__BYTES(file_area->blocks); /* All generic areas have this */
+	int bytes_left;
 	fru__file_field_t * field = NULL;
 	int infoidx = FRU_ATYPE_TO_INFOIDX(atype);
 	int cksum;
 
 	DEBUG("Decoding %zu bytes of info area type %d @ %p", data_size, atype, file_area);
 
-	if (!fru || !data_in) {
-		errno = EFAULT;
+	if (infoidx < 0) {
+		// This can't happen here, but we still
+		// check to make static analyzers happy
 		fru__seterr(FEAREABADTYPE, FERR_LOC_GENERAL, atype);
 		return false;
 	}
+
+	bytes_left = FRU__BYTES(file_area->blocks); /* All generic areas have this */
 
 	/* An area must at least contain a header */
 	if (data_size < FRU__INFO_AREA_HEADER_SZ) {
@@ -661,24 +667,15 @@ struct area_order_s {
 	off_t offset;
 };
 
-/* Sort the area_order array to reflect the actual order
- * of the areas in the file */
-static void sort_areas_by_offset(struct area_order_s *area_order)
+// A comparator function for qsort()
+static int cmp_area_offsets(const void *a1,
+                            const void *a2)
 {
-	for (int pos = FRU_MIN_AREA + 1; pos <= FRU_MAX_AREA; pos++) {
-		int pos2, newpos;
-		struct area_order_s this_ao = area_order[pos];
-		for (pos2 = pos - 1, newpos = pos; pos2 >= FRU_MIN_AREA; pos2--) {
-			if (this_ao.offset < area_order[pos2].offset) {
-				/* Move all from pos2 to newpos-1 one position to the right */
-				for (int old = newpos; old > pos2; --old) {
-					area_order[old] = area_order[old - 1];
-				}
-				area_order[pos2] = this_ao;
-				newpos = pos2;
-			}
-		}
-	}
+	const struct area_order_s *a[2] = {
+		(const struct area_order_s *)a1,
+		(const struct area_order_s *)a2
+	};
+	return a[0]->offset - a[1]->offset;
 }
 /** @endcond */
 
@@ -768,7 +765,7 @@ fru_t * fru_loadbuffer(fru_t * init_fru,
 		fru->present[atype] = true;
 	}
 
-	sort_areas_by_offset(area_order);
+	qsort(area_order, FRU_TOTAL_AREAS, sizeof(struct area_order_s), cmp_area_offsets);
 
 	/* Save the result into fru->order */
 	int pos;

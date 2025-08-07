@@ -39,12 +39,20 @@ option(ENABLE_JSON "enable JSON support" ON)
 option(JSON_STATIC "link json-c library statically" OFF)
 option(DEBUG_OUTPUT "show extra debug output" OFF)
 
-set(CMAKE_C_FLAGS_RELEASE "-Os")
-set(CMAKE_C_FLAGS_DEBUG "-g3 -O0")
+message(STATUS "Compiler is ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}")
 if(MSVC)
 	# warning level 4
 	add_compile_options(/W4)
 else(MSVC)
+	# Enable static analyzer for gcc 13+
+	# It still may produce some falso positives, but it's quite decent already.
+	if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "13.0")
+		set(CMAKE_C_FLAGS_RELEASE "-Os -fanalyzer")
+		set(CMAKE_C_FLAGS_DEBUG "-g3 -O0 -fanalyzer")
+	else()
+		set(CMAKE_C_FLAGS_RELEASE "-Os")
+		set(CMAKE_C_FLAGS_DEBUG "-g3 -O0")
+	endif()
 	# additional warnings
 	add_compile_options(
 		-Wall
@@ -171,10 +179,12 @@ endif(ENABLE_JSON)
 
 list(APPEND ALL_TARGETS ${LIB_TARGETS} "frugen")
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set_target_properties(frugen PROPERTIES LINK_FLAGS "-Wl,--gc-sections,--print-gc-sections")
-else()
-	set_target_properties(frugen PROPERTIES LINK_FLAGS "-Wl,--gc-sections")
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+		set_target_properties(frugen PROPERTIES LINK_FLAGS "-Wl,--gc-sections,--print-gc-sections")
+	else()
+		set_target_properties(frugen PROPERTIES LINK_FLAGS "-Wl,--gc-sections")
+	endif()
 endif()
 
 if(BINARY_STATIC)

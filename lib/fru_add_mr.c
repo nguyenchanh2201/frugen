@@ -44,6 +44,7 @@ fru_mr_rec_t * fru_add_mr(fru_t * fru, size_t index, fru_mr_rec_t * rec)
 	if (!newrec) {
 		fru__seterr(FEGENERIC, FERR_LOC_MR, index);
 		errno = EFAULT;
+		return NULL;
 	}
 	newrec->type = FRU_MR_EMPTY;
 

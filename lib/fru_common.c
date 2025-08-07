@@ -11,6 +11,9 @@
  *  SPDX-License-Identifier: GPL-2.0-or-later OR Apache-2.0
  */
 
+#define _DEFAULT_SOURCE // For le16toh() and hto16le()
+#include <endian.h>
+
 #include <errno.h>
 #include <stddef.h>
 #include <stdlib.h>

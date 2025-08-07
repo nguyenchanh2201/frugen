@@ -75,14 +75,6 @@ bool fru_setfield_binary(fru_field_t * field,
 
 	// Truncate input to fit
 	size_t insize = FRU_MIN(size, FRU__FIELDMAXLEN);
-	// Allocate a buffer for the resulting hex string.
-	// Each input byte turns into two, plus the NUL terminator byte
-	uint8_t * hexstr = calloc(1, insize * 2 + 1);
-	if (!hexstr) {
-		fru__seterr(FEGENERIC, FERR_LOC_GENERAL, -1);
-		errno = EFAULT;
-		goto out;
-	}
 
 	fru__decode_raw_binary(buf, size, field->val, insize * 2 + 1);
 	field->enc = FRU_FE_BINARY;
