@@ -264,7 +264,7 @@ bool decode_info_area(fru_t * fru,
 
 	if (!fru || !data_in) {
 		errno = EFAULT;
-		fru__seterr(FEGENERIC, atype, -1);
+		fru__seterr(FEAREABADTYPE, FERR_LOC_GENERAL, atype);
 		return false;
 	}
 
@@ -799,7 +799,7 @@ fru_t * fru_loadfile(fru_t * init_fru,
 	int err = 0;
 
 	if (!filename) {
-		fru__seterr(FEGENERIC, FERR_LOC_GENERAL, -1);
+		fru__seterr(FEGENERIC, FERR_LOC_CALLER, -1);
 		errno = EFAULT;
 		goto out;
 	}
@@ -807,13 +807,13 @@ fru_t * fru_loadfile(fru_t * init_fru,
 	fd = open(filename, O_RDONLY);
 	DEBUG("open() == %d", fd);
 	if (fd < 0) {
-		fru__seterr(FEGENERIC, FERR_LOC_GENERAL, -1);
+		fru__seterr(FEGENERIC, FERR_LOC_SYSTEM, -1);
 		goto out;
 	}
 
 	struct stat statbuf = {0};
 	if (fstat(fd, &statbuf)) {
-		fru__seterr(FEGENERIC, FERR_LOC_GENERAL, -1);
+		fru__seterr(FEGENERIC, FERR_LOC_SYSTEM, -1);
 		goto err;
 	}
 	DEBUG("st_size == %zd", statbuf.st_size);
@@ -824,7 +824,7 @@ fru_t * fru_loadfile(fru_t * init_fru,
 
 	buffer = mmap(NULL, statbuf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 	if (buffer == MAP_FAILED) {
-		fru__seterr(FEGENERIC, FERR_LOC_GENERAL, -1);
+		fru__seterr(FEGENERIC, FERR_LOC_SYSTEM, -1);
 		goto err;
 	}
 	DEBUG("loading into buffer @ %p", buffer);

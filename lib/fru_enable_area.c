@@ -61,7 +61,7 @@ bool fru_enable_area(fru_t * fru, fru_area_type_t atype, fru_area_position_t aft
 		 * This can only happen if fru_t structure wasn't initialized with fru_init(),
 		 * or if it was later manually tampered with. No library API can result in this.
 		 */
-		fru__seterr(FEINIT, FERR_LOC_GENERAL, -1);
+		fru__seterr(FEINIT, FERR_LOC_CALLER, -1);
 		return false;
 	}
 

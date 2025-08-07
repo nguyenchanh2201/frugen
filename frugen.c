@@ -604,6 +604,7 @@ void fru_perror(FILE *fp, const char *fmt, ...)
 		area_names[FRU_MR].human,
 		"FRU",
 		"frugen",
+		"system",
 	};
 	va_list args;
 	va_start(args, fmt);

@@ -71,6 +71,7 @@ typedef enum {
 	                   *   encounters an error.
 	                   */
 	FERR_LOC_CALLER, /**< The error is in the calling code (bad arguments?) */
+	FERR_LOC_SYSTEM, /**< The error occurred in a system call */
 	FERR_LOC_COUNT /**< The total count of possible error locations */
 } fru_error_source_t;
 
