@@ -23,7 +23,7 @@ execute_process(COMMAND
 	OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 if(NOT res EQUAL 0)
-	set(gitver "v2.0-dirty-orphan")
+	set(gitver "v3.0-dirty-orphan")
 endif()
 
 string(REPLACE "v" "" gitver "${gitver}")
