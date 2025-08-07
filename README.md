@@ -195,7 +195,7 @@ For the most up-to-date information on the frugen tool invocation and options, p
 use `frugen -h`, below is an example of the output of that command:
 
 ```
-FRU Generator v3.0.0.gXXXXXXX (C) 2016-2025, Alexander Amelkin <alexander@amelkin.msk.ru>
+FRU Generator v3.0.11.gXXXXXXX (C) 2016-2025, Alexander Amelkin <alexander@amelkin.msk.ru>
 
 Usage: frugen [options] <filename>
 
@@ -241,6 +241,18 @@ Options:
 	-o <argument>, --out-format <argument>
 		Output format, one of:
 		binary - Default format when writing to a file.
+
+		         NOTE: When generating a binary FRU using command line options only,
+		               that is, without an input template file, please keep in
+		               mind that the areas will be put into the output binary file
+		               in the order of given options. Hence, to create a FRU with
+		               the default layot, use area-related options in the default
+		               order, which is: chassis, board, product, multirecord.
+
+		               When using a template, the order of areas will be preserved
+		               for the areas defined in the template. Any new areas will be
+		               added in the order of options as described above.
+
 		         For stdout, the following will be used, even
 		         if 'binary' is explicitly specified:
 		json   - Default when writing to stdout.

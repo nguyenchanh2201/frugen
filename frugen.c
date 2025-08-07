@@ -111,6 +111,18 @@ static const char * const option_help[] = {
 	['j'] = "Load FRU information from a JSON file, use '-' for stdin",
 	['o'] = "Output format, one of:\n"
 	        "\t\tbinary - Default format when writing to a file.\n"
+	        "\n"
+	        "\t\t         NOTE: When generating a binary FRU using command line options only,\n"
+	        "\t\t               that is, without an input template file, please keep in\n"
+	        "\t\t               mind that the areas will be put into the output binary file\n"
+	        "\t\t               in the order of given options. Hence, to create a FRU with\n"
+	        "\t\t               the default layot, use area-related options in the default\n"
+	        "\t\t               order, which is: chassis, board, product, multirecord.\n"
+	        "\n"
+	        "\t\t               When using a template, the order of areas will be preserved\n"
+	        "\t\t               for the areas defined in the template. Any new areas will be\n"
+	        "\t\t               added in the order of options as described above.\n"
+	        "\n"
 	        "\t\t         For stdout, the following will be used, even\n"
 	        "\t\t         if 'binary' is explicitly specified:\n"
 #ifdef __HAS_JSON__
