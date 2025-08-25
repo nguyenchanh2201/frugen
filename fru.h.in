@@ -618,7 +618,7 @@ typedef enum {
  * If the encoding attempt succeeds, the input string and the requested
  * encoding value will be copied into the given \a field. The string will be
  * truncated to fit and the truncation event will be indicated via
- * \ref fru_errno.code as \ref FE2BIG along with success return code. Please
+ * [fru_errno.code](\ref fru_errno_t) as \ref FE2BIG along with success return code. Please
  * call \ref fru_clearerr() before the call to avoid false positive checks for
  * truncation.
  *
@@ -627,7 +627,7 @@ typedef enum {
  * @param[in]      encoding  Desired encoding.
  * @param[in]      string    The input string to set the field to.
  * @returns Success status
- * @retval true Success, check \ref fru_errno.code for \ref FE2BIG to
+ * @retval true Success, check [fru_errno.code](\ref fru_errno_t) for \ref FE2BIG to
  *              see if data was truncated
  * @retval false Failure, check \ref fru_errno for details
  *
@@ -648,7 +648,7 @@ bool fru_setfield(fru_field_t * field,
  *
  * If the input buffer size is too large to fit into a field (that is,
  * more than 63 bytes), only the data that can fit will be taken, and
- * the truncation event will be indicated via \ref fru_errno.code as
+ * the truncation event will be indicated via [fru_errno.code](\ref fru_errno_t) as
  * \ref FE2BIG along with a success return code. Please call
  * \ref fru_clearerr() before the call to avoid false positive checks for
  * truncation.
@@ -658,7 +658,7 @@ bool fru_setfield(fru_field_t * field,
  * @param[in]      buf       The source binary buffer
  * @param[in]      size      The source buffer size in bytes
  * @returns Success status
- * @retval true Success, check \ref fru_errno.code for \ref FE2BIG to
+ * @retval true Success, check [fru_errno.code](\ref fru_errno_t) for \ref FE2BIG to
  *              see if data was truncated
  * @retval false Failure, check \ref fru_errno for details
  *
@@ -700,7 +700,7 @@ bool fru_setfield_binary(fru_field_t * field,
  * @param[in] index The index of the custom field to fetch
  *
  * @returns A pointer to the mandatory field at the requested index or \a NULL
- *          in the event of failure. For the latter case \ref fru_errno.code is set to:
+ *          in the event of failure. For the latter case [fru_errno.code](\ref fru_errno_t) is set to:
  *           - \ref FEAREANOTSUP
  *           - \ref FEAREABADTYPE
  *           - \ref FENOFIELD
@@ -741,7 +741,7 @@ fru_field_t * fru_getfield(const fru_t * fru,
  *
  * @returns A pointer to the added field, see \ref fru_setfield() for info
  *          on possible errors
- * @retval NULL Failure, additionally may set \ref fru_errno.code to:
+ * @retval NULL Failure, additionally may set [fru_errno.code](\ref fru_errno_t) to:
  *               - \ref FEAREANOTSUP
  *               - \ref FEAREABADTYPE
  *
@@ -770,7 +770,7 @@ fru_field_t * fru_add_custom(fru_t * fru,
  * @param[in] index The index of the custom field to fetch
  *
  * @returns A pointer to the custom field at the requested index or \a NULL
- *          in the event of failure. For the latter case \ref fru_errno.code is set to:
+ *          in the event of failure. For the latter case [fru_errno.code](\ref fru_errno_t) is set to:
  *           - \ref FEAREANOTSUP
  *           - \ref FEAREABADTYPE
  *           - \ref FENOFIELD
@@ -1071,7 +1071,7 @@ bool fru_enable_area(fru_t * fru,
  * @param[in, out] fru A pointer to the FRU structure to modify
  * @param[in] atype The area type to disable
  * @returns A success status
- * @retval true Success, will also set \ref fru_errno.code to FEADISABLED
+ * @retval true Success, will also set [fru_errno.code](\ref fru_errno_t) to FEADISABLED
  *              if the area was already disabled before the call
  * @retval false Error, see \ref fru_errno for details
  */
@@ -1482,7 +1482,7 @@ fru_mr_rec_t * fru_add_mr(fru_t * fru, size_t index, fru_mr_rec_t * rec);
  *
  * If the requested \a index is the last one, then along with
  * returning a valid pointer to the entry at that index, the function
- * will also set \ref fru_errno.code to \ref FEMREND.
+ * will also set [fru_errno.code](\ref fru_errno_t) to \ref FEMREND.
  *
  * \b Hint
  *
@@ -1512,7 +1512,7 @@ fru_mr_rec_t * fru_get_mr(const fru_t * fru, size_t index);
  * \p type and the starting \p index. Updates \p index when the
  * record is found, sets it to the index of the found record.
  * If the found record was the last in the list, then sets
- * \ref fru_errno.code to \ref FEMREND (but succeeds)
+ * [fru_errno.code](\ref fru_errno_t) to \ref FEMREND (but succeeds)
  *
  * If \p type is FRU_MR_ANY, then \p index must point to a non-negative
  * value indicating the index of the record to fetch. In this case

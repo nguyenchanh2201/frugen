@@ -15,7 +15,7 @@
 
 /**
  * Defines the errors specific to \a libfru.
- * These values are applicable to \ref fru_errno.code
+ * These values are applicable to [fru_errno.code](\ref fru_errno_t)
  */
 typedef enum {
     FENONE,          /**< No libfru error */
