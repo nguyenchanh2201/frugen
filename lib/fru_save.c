@@ -675,7 +675,7 @@ bool fru_savebuffer(void ** bufptr, size_t * size, const fru_t * fru)
 
 err:
 	if (allocated) {
-		zfree(*bufptr);
+		fru__zfree(*bufptr);
 		*size = 0;
 	}
 	return false;
@@ -727,7 +727,7 @@ bool fru_savefile(const char * fname, const fru_t * fru)
 
 	rc = true;
 out:
-	zfree(frufile);
+	fru__zfree(frufile);
 	if (fd >= 0)
 		close(fd);
 	return rc;

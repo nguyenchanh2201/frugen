@@ -779,7 +779,7 @@ err:
 	// Don't free the supplied init_fru in case
 	// it was staticaly allocated
 	if (!init_fru)
-		zfree(fru);
+		fru__zfree(fru);
 	fru = NULL;
 out:
 	return fru;

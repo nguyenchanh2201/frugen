@@ -78,14 +78,14 @@ fru_mr_rec_t * mr_operation(fru_t * fru,
 					/* Empty rec means they want to delete the record */
 					fru__mr_reclist_t ** mr_head = (fru__mr_reclist_t **)&fru->mr;
 					fru__mr_reclist_t ** prevptr = mr_head;
-					zfree(entry->rec);
+					fru__zfree(entry->rec);
 
 					if (prev_entry)
 						prevptr = &prev_entry->next;
 
 					(*prevptr) = entry->next;
 
-					zfree(entry);
+					fru__zfree(entry);
 
 					/* If there are no more entries in MR list, this means the area
 					 * is emtpy, mark it as not present */

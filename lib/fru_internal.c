@@ -119,7 +119,7 @@ bool fru_set_internal_binary(fru_t * fru,
 	}
 
 	if (size * 2 + 1 > out_len) {
-		zfree(hexstring);
+		fru__zfree(hexstring);
 		fru__seterr(FE2BIG, FERR_LOC_INTERNAL, -1);
 		goto err;
 	}
@@ -165,7 +165,7 @@ bool fru_delete_internal(fru_t * fru)
 	}
 
 	fru->present[FRU_INTERNAL_USE] = false;
-	zfree(fru->internal);
+	fru__zfree(fru->internal);
 
 	return true;
 }

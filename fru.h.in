@@ -75,7 +75,7 @@
  */
 
 /** @brief Deallocate a buffer and set it to NULL */
-#define zfree(buf) do { \
+#define fru__zfree(buf) do { \
 	int err = errno; /* Prevent errno corruption */ \
 	free(buf); \
 	(buf) = NULL; \
@@ -982,7 +982,7 @@ void fru_wipe(fru_t * fru);
  *
  * @param[in] fru Pointer to the decoded FRU information structure to delete
  */
-#define fru_free(fru) do { fru_wipe(fru); zfree(fru); } while(0)
+#define fru_free(fru) do { fru_wipe(fru); fru__zfree(fru); } while(0)
 
 /**
  * @brief Enable a previously disabled / non-present area

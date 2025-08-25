@@ -172,8 +172,8 @@ bool fru__free_reclist(void * listptr)
 
 	while (entry) {
 		fru__genlist_t * next = entry->next;
-		zfree(entry->data);
-		zfree(entry);
+		fru__zfree(entry->data);
+		fru__zfree(entry);
 		entry = next;
 	}
 
@@ -198,7 +198,7 @@ void fru_wipe(fru_t * fru)
 {
 	if (!fru) return;
 
-	zfree(fru->internal);
+	fru__zfree(fru->internal);
 	fru__free_reclist(&fru->chassis.cust);
 	fru__free_reclist(&fru->board.cust);
 	fru__free_reclist(&fru->product.cust);
