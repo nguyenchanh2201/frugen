@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <string.h>
 
+FRU_EXPORT
 fru_field_t * fru_add_custom(fru_t * fru,
                              fru_area_type_t atype,
                              size_t index,

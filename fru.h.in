@@ -39,6 +39,9 @@
  *
  * @defgroup multirec MultiRecord area
  * @brief Definitions related to MultiRecord Area
+ *
+ * @defgroup util Utilities
+ * @brief Various utility definitions, not directly related to FRU
  */
 
 /**
@@ -807,12 +810,33 @@ bool fru_delete_custom(fru_t * fru,
 /** @} infocommon */
 
 /**
- * @addtogroup common
+ * @addtogroup util
  * @{
  */
 
 /** A convenience macro to get the size of an array in elements */
 #define FRU_ARRAY_SZ(a) (sizeof(a) / sizeof((a)[0]))
+
+/**
+ * @brief Convert 2 first bytes of hex string into a binary byte.
+ *
+ * This is just a convenience utility function, not directly
+ * related to FRU.
+ *
+ * @returns A byte converted from hex string (in the lower 8 bits)
+ *          or a -1 for an error.
+ * @retval -1 An error occured. See \ref fru_errno
+ *
+ * @ingroup util
+ */
+int16_t fru_hex2byte(const char * hex);
+
+/** @} util */
+
+/**
+ * @addtogroup common
+ * @{
+ */
 
 /// Add entry at the head of the list, used by fru_add_mr() and alike
 #define FRU_LIST_HEAD 0
@@ -845,20 +869,6 @@ typedef enum {
 } fru_area_position_t;
 #define FRU_IS_APOS_VALID(pos) (FRU_APOS_LAST <= (pos) && (pos) <= FRU_APOS_MAX)
 
-
-/**
- * @brief Convert 2 first bytes of hex string into a binary byte.
- *
- * This is just a convenience utility function, not directly
- * related to FRU.
- *
- * @returns A byte converted from hex string (in the lower 8 bits)
- *          or a -1 for an error.
- * @retval -1 An error occured. See \ref fru_errno
- *
- * @ingroup common
- */
-int16_t fru_hex2byte(const char * hex);
 
 /**
  * @brief Initialize/allocate a fru structure

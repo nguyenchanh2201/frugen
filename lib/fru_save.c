@@ -628,6 +628,7 @@ static bool create_frufile(fru__file_t * frufile, size_t * size, const fru_t * f
  */
 
 // See fru.h
+FRU_EXPORT
 bool fru_savebuffer(void ** bufptr, size_t * size, const fru_t * fru)
 {
 	size_t realsize = 0;
@@ -681,6 +682,7 @@ err:
 	return false;
 }
 
+FRU_EXPORT
 bool fru_savefile(const char * fname, const fru_t * fru)
 {
 	fru__file_t * frufile = NULL;

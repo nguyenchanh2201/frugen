@@ -136,16 +136,6 @@ size_t get_area_limit(void *fru_file, size_t size, fru_area_type_t type)
 }
 
 /**
- * Strip trailing spaces
- */
-static inline
-void cut_tail(char *s)
-{
-	int i;
-	for(i = strlen((char *)s) - 1; i >= 0 && ' ' == s[i]; i--) s[i] = 0;
-}
-
-/**
  * A helper function to decoding of custom fields in a
  * generic info area (chassis, board, product).
  *
@@ -686,6 +676,7 @@ static int cmp_area_offsets(const void *a1,
  */
 
 // See fru.h
+FRU_EXPORT
 fru_t * fru_loadbuffer(fru_t * init_fru,
                        const void * buf,
                        size_t size,
@@ -786,6 +777,7 @@ out:
 }
 
 // See fru.h
+FRU_EXPORT
 fru_t * fru_loadfile(fru_t * init_fru,
                      const char *filename,
                      fru_flags_t flags)

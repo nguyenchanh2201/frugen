@@ -22,6 +22,7 @@
 
 #define FRU__DEFAULT_CHASSIS_TYPE 0x17 // Rack-mount, see SMBIOS specification
 
+FRU_EXPORT
 fru_t * fru_init(fru_t * fru)
 {
 	if (!fru) {

@@ -110,12 +110,14 @@ fru_mr_rec_t * mr_operation(fru_t * fru,
 }
 
 // See fru.h
+FRU_EXPORT
 bool fru_delete_mr(fru_t * fru, size_t index)
 {
 	return (NULL != mr_operation(fru, MR_OP_REPLACE, NULL, FRU_MR_ANY, &index));
 }
 
 // See fru.h
+FRU_EXPORT
 bool fru_replace_mr(fru_t * fru,
                     size_t index,
                     fru_mr_rec_t * rec)
@@ -124,6 +126,7 @@ bool fru_replace_mr(fru_t * fru,
 }
 
 // See fru.h
+FRU_EXPORT
 fru_mr_rec_t * fru_find_mr(const fru_t * fru,
                            fru_mr_type_t type,
                            size_t * index)
@@ -132,6 +135,7 @@ fru_mr_rec_t * fru_find_mr(const fru_t * fru,
 }
 
 // See fru.h
+FRU_EXPORT
 fru_mr_rec_t * fru_get_mr(const fru_t * fru, size_t index)
 {
 	return fru_find_mr(fru, FRU_MR_ANY, &index);

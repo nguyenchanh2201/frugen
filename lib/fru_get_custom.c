@@ -12,7 +12,7 @@
 #include "fru-private.h"
 #include "../fru_errno.h"
 
-
+FRU_EXPORT
 fru_field_t * fru_get_custom(const fru_t * fru,
                              fru_area_type_t atype,
                              size_t index)

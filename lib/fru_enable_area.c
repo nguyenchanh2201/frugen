@@ -12,6 +12,7 @@
 #include "fru-private.h"
 #include "../fru_errno.h"
 
+FRU_EXPORT
 bool fru_enable_area(fru_t * fru, fru_area_type_t atype, fru_area_position_t after)
 {
 	if (!fru) {
@@ -132,6 +133,7 @@ bool fru_enable_area(fru_t * fru, fru_area_type_t atype, fru_area_position_t aft
 	return true;
 }
 
+FRU_EXPORT
 bool fru_disable_area(fru_t * fru, fru_area_type_t atype)
 {
 	fru_area_position_t old_pos = FRU_APOS_AUTO;
@@ -209,6 +211,7 @@ bool fru_disable_area(fru_t * fru, fru_area_type_t atype)
 	return true;
 }
 
+FRU_EXPORT
 bool fru_move_area(fru_t * fru, fru_area_type_t area, fru_area_position_t after)
 {
 	fru_clearerr();

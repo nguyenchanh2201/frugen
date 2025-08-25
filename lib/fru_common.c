@@ -194,6 +194,7 @@ time_t fru__datetime_base(void) {
 /** @endcond */
 
 // See fru.h
+FRU_EXPORT
 void fru_wipe(fru_t * fru)
 {
 	if (!fru) return;
@@ -209,6 +210,7 @@ void fru_wipe(fru_t * fru)
 /** See fru.h */
 #define FRU__NIBBLES_IN_BYTE 2
 #define FRU__NIBBLE_SIZE 4
+FRU_EXPORT
 int16_t fru_hex2byte(const char * hex)
 {
 	if (!hex) {

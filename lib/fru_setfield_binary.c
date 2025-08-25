@@ -55,6 +55,7 @@ void fru__decode_raw_binary(const void *in,
 
 
 // See fru.h
+FRU_EXPORT
 bool fru_setfield_binary(fru_field_t * field,
                          const void * buf,
                          size_t size)

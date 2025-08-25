@@ -393,6 +393,7 @@ out:
 }
 
 // See fru.h
+FRU_EXPORT
 bool fru_setfield(fru_field_t * field,
                   fru_field_enc_t encoding,
                   const char * s)

@@ -15,16 +15,6 @@
 #include "../fru_errno.h"
 
 /**
- * Strip trailing spaces
- */
-static inline
-void cut_tail(char *s)
-{
-	int i;
-	for(i = strlen((char *)s) - 1; i >= 0 && ' ' == s[i]; i--) s[i] = 0;
-}
-
-/**
  * @brief Get a hex string representation of the supplied binary field.
  *
  * @param[in] field Field to decode.

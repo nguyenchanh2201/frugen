@@ -51,6 +51,7 @@ bool delete_reclist_entry(void * head_ptr, int index)
 	return true;
 }
 
+FRU_EXPORT
 bool fru_delete_custom(fru_t * fru,
                        fru_area_type_t atype,
                        size_t index)

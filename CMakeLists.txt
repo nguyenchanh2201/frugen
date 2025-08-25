@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
+include(GenerateExportHeader)
+
 # To make frugen 32-bit, set BINARY_32BIT or use an external toolchain file
 option(BINARY_32BIT "compile 32bit version" OFF)
 if(BINARY_32BIT)
@@ -115,6 +117,9 @@ set(libfru_PUBLIC_HEADERS
 
 if(BUILD_SHARED_LIB)
 	add_library(fru-shared SHARED ${libfru_SOURCES} ${libfru_HEADERS})
+	set_target_properties(fru-shared PROPERTIES C_VISIBILITY_PRESET hidden)
+	generate_export_header(fru-shared BASE_NAME fru)
+
 	add_library(frugen::fru-shared ALIAS fru-shared)
 	target_include_directories(fru-shared PUBLIC
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
@@ -128,6 +133,8 @@ endif(BUILD_SHARED_LIB)
 if(BINARY_STATIC OR NOT BUILD_SHARED_LIB)
 	add_library(fru-static STATIC ${libfru_SOURCES} ${libfru_HEADERS})
 	add_library(frugen::fru-static ALIAS fru-static)
+	set_target_properties(fru-static PROPERTIES C_VISIBILITY_PRESET hidden)
+	generate_export_header(fru-static BASE_NAME fru)
 	target_include_directories(fru-static PUBLIC
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 		$<INSTALL_INTERFACE:include>
@@ -140,6 +147,8 @@ endif(BINARY_STATIC OR NOT BUILD_SHARED_LIB)
 # target for frugen
 set(frugen_SOURCES frugen.c)
 add_executable(frugen ${frugen_SOURCES})
+
+set_target_properties(frugen PROPERTIES C_VISIBILITY_PRESET default)
 
 if(ENABLE_JSON)
 	find_package(PkgConfig)

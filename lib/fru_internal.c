@@ -96,6 +96,7 @@ bool hexcopy(char ** outhexstr, const char * hexstr)
 }
 
 // See fru.h
+FRU_EXPORT
 bool fru_set_internal_binary(fru_t * fru,
                              const void * buffer,
                              size_t size)
@@ -134,6 +135,7 @@ err:
 }
 
 // See fru.h
+FRU_EXPORT
 bool fru_set_internal_hexstring(fru_t * fru, const void * hexstr)
 {
 	if (!fru || !hexstr) {
@@ -151,6 +153,7 @@ bool fru_set_internal_hexstring(fru_t * fru, const void * hexstr)
 	return true;
 }
 
+FRU_EXPORT
 bool fru_delete_internal(fru_t * fru)
 {
 	if (!fru) {

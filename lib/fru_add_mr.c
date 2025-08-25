@@ -16,6 +16,7 @@
 
 
 // See fru.h
+FRU_EXPORT
 fru_mr_rec_t * fru_add_mr(fru_t * fru, size_t index, fru_mr_rec_t * rec)
 {
 	if (!fru) {
