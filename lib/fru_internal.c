@@ -92,6 +92,9 @@ bool hexcopy(char ** outhexstr, const char * hexstr)
 			newhexstr[len++] = hexstr[i];
 		}
 
+	// We didn't copy the NUL byte, terminate the copied string now
+	newhexstr[len] = 0;
+
 	return true;
 }
 
