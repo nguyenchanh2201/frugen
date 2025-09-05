@@ -43,6 +43,7 @@ extern const frugen_name_t area_names[FRU_TOTAL_AREAS];
 extern const size_t field_max[FRU_TOTAL_AREAS];
 extern const frugen_name_t * const field_name[FRU_TOTAL_AREAS];
 extern const frugen_name_t frugen_mr_mgmt_name[FRU_MR_MGMT_INDEX_COUNT];
+extern const frugen_name_t frugen_mr_type_names[FRU_MR_TYPE_COUNT];
 
 void fru_perror(FILE *fp, const char *fmt, ...);
 

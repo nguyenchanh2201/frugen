@@ -293,29 +293,26 @@ bool load_mr_record(fru_t * fru,
 		goto out;
 	}
 
-	struct recloader {
-		const char * const typename;
-		bool (*func)(fru_t *, struct json_object *);
-	} record_loader[] = {
-		{ "management", load_mr_mgmt_record },
-//		{ "psu", load_mr_psu_record }, // TODO: Not supported yet
-		{ "custom", load_mr_raw_record },
+	static bool (* const mr_loader[FRU_MR_TYPE_COUNT])(fru_t *, json_object *) = {
+		[FRU_MR_MGMT_ACCESS] = load_mr_mgmt_record,
+//		[FRU_MR_PSU_INFO] = load_mr_psu_record, // TODO: Not supported yet
+		[FRU_MR_RAW] = load_mr_raw_record
 	};
 
 	debug(3, "Record is of type '%s'", type);
-	size_t i = 0;
-	for (; i < FRU_ARRAY_SZ(record_loader); i++) {
-		if (!strcmp(type, record_loader[i].typename)) {
-			if (!record_loader[i].func(fru, item))
+	for (size_t i = 0; i < FRU_MR_TYPE_COUNT; i++) {
+		if (!strcmp(type, frugen_mr_type_names[i].json)) {
+			if (!mr_loader[i]) {
+				warn("Multirecord type '%s' is not supported in JSON", type);
+				break;
+			}
+			if (!mr_loader[i](fru, item)) {
+				warn("Faled to load MR record of type '%s'", type);
 				goto out;
+			}
 			else
 				break;
 		}
-	}
-
-	if (i == FRU_ARRAY_SZ(record_loader)) {
-		warn("Multirecord type '%s' is not supported in JSON", type);
-		goto out;
 	}
 
 	rc = true;
@@ -626,6 +623,42 @@ void add_info_area_json(struct json_object * jso,
 	json_object_object_add(jso, aname, section);
 }
 
+static
+void add_mr_mgmt_json(struct json_object * js_rec, const fru_mr_rec_t * rec)
+{
+	fru_mr_mgmt_type_t subtype = rec->mgmt.subtype;
+	struct json_object * jsfield = NULL;
+	off_t idx = FRU_MR_MGMT_SUBTYPE_TO_IDX(subtype);
+	const char * recname = NULL;
+
+	if (idx < 0) {
+		json_object_put(js_rec);
+		fatal("Invalid management access record subtype %d", subtype);
+	}
+
+	recname = frugen_mr_mgmt_name[idx].json;
+
+	jsfield = json_object_new_string(recname);
+	json_object_object_add(js_rec, "subtype", jsfield);
+
+	jsfield = json_object_new_string(rec->mgmt.data);
+	json_object_object_add(js_rec, recname, jsfield);
+}
+
+static
+void add_mr_raw_json(struct json_object * js_rec, const fru_mr_rec_t * rec)
+{
+	uint8_t raw_type = rec->raw.type;
+	struct json_object * jsfield = NULL;
+
+	jsfield = json_object_new_int(raw_type);
+	json_object_object_add(js_rec, "custom_type", jsfield);
+
+	jsfield = json_object_new_string(rec->raw.data);
+	json_object_object_add(js_rec, "data", jsfield);
+}
+
+static
 void add_mr_record_json(struct json_object * jsa, fru_mr_rec_t * rec)
 {
 	struct json_object * js_rec = json_object_new_object();
@@ -633,45 +666,19 @@ void add_mr_record_json(struct json_object * jsa, fru_mr_rec_t * rec)
 	if (!js_rec)
 		fatal("Failed to create a new JSON object for MR record");
 
-	if (rec->type == FRU_MR_MGMT_ACCESS) {
-		fru_mr_mgmt_type_t subtype = rec->mgmt.subtype;
-		struct json_object * jsfield = NULL;
-		off_t idx = FRU_MR_MGMT_SUBTYPE_TO_IDX(subtype);
-		const char * recname = NULL;
+	static void (* const mr_adder[FRU_MR_TYPE_COUNT])(json_object *, const fru_mr_rec_t *) = {
+		[FRU_MR_MGMT_ACCESS] = add_mr_mgmt_json,
+		/* TODO: Add more MR types */
+		[FRU_MR_RAW] = add_mr_raw_json
+	};
 
-		if (idx < 0) {
-			json_object_put(js_rec);
-			fatal("Invalid management access record subtype %d", subtype);
-		}
+	if (mr_adder[rec->type]) {
+		json_object * jsfield = NULL;
 
-		recname = frugen_mr_mgmt_name[idx].json;
-
-		jsfield = json_object_new_string("management");
+		jsfield = json_object_new_string(frugen_mr_type_names[rec->type].json);
 		json_object_object_add(js_rec, "type", jsfield);
 
-		jsfield = json_object_new_string(recname);
-		json_object_object_add(js_rec, "subtype", jsfield);
-
-		jsfield = json_object_new_string(rec->mgmt.data);
-		json_object_object_add(js_rec, recname, jsfield);
-	}
-/* TODO: Add more MR types
-	else if (rec->type = ... ) {
-		// Add code here
-	}
-*/
-	else if (rec->type == FRU_MR_RAW) {
-		uint8_t raw_type = rec->raw.type;
-		struct json_object * jsfield = NULL;
-
-		jsfield = json_object_new_string("custom");
-		json_object_object_add(js_rec, "type", jsfield);
-
-		jsfield = json_object_new_int(raw_type);
-		json_object_object_add(js_rec, "custom_type", jsfield);
-
-		jsfield = json_object_new_string(rec->raw.data);
-		json_object_object_add(js_rec, "data", jsfield);
+		mr_adder[rec->type](js_rec, rec);
 	}
 
 	json_object_array_add(jsa, js_rec);
@@ -714,8 +721,8 @@ void add_mr_area_json(struct json_object * jso,
 
 }
 
-void save_to_json_file(FILE **fp, const char *fname,
-                       const fru_t * fru)
+void frugen_savefile_json(FILE **fp, const char *fname,
+                          const fru_t * fru)
 {
 	struct json_object *json_root = json_object_new_object();
 

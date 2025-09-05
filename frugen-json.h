@@ -13,5 +13,7 @@
  */
 void frugen_loadfile_json(fru_t * fru, const char * fname);
 
-void save_to_json_file(FILE **fp, const char *fname,
-                       const fru_t * fru);
+/**
+ * Save a FRU information structure as a JSON file
+ */
+void frugen_savefile_json(FILE **fp, const char *fname, const fru_t * fru);

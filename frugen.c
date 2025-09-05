@@ -388,93 +388,93 @@ bool isdelim(char c)
 	return ((c == ' ') || (c == '.') || (c == '-') || (c ==':'));
 }
 
-static char * const mr_type_names[FRU_MR_TYPE_COUNT] = {
-	[FRU_MR_PSU_INFO] = "PSU Information",
-	[FRU_MR_DC_OUT] = "DC Output",
-	[FRU_MR_DC_LOAD] = "DC Load",
-	[FRU_MR_MGMT_ACCESS] = "Management Access Record",
-	[FRU_MR_BCR] = "Base Compatibility Record",
-	[FRU_MR_ECR] = "Extended Compatibility Record",
+const frugen_name_t frugen_mr_type_names[FRU_MR_TYPE_COUNT] = {
+	[FRU_MR_PSU_INFO] = { "psu", "PSU Information" },
+	[FRU_MR_DC_OUT] = { "dcout", "DC Output" },
+	[FRU_MR_DC_LOAD] = { "dcload", "DC Load" },
+	[FRU_MR_MGMT_ACCESS] = { "management", "Management Access Record" },
+	[FRU_MR_BCR] = { "bcr", "Base Compatibility Record" },
+	[FRU_MR_ECR] = { "ecr", "Extended Compatibility Record" },
 
-	[FRU_MR_ASF_FIXED_SMBUS] = "ASF Fixed SMBus Addresses",
-	[FRU_MR_ASF_LEGACY_ALERTS] = "ASF Lecacy-Device Alerts",
-	[FRU_MR_ASF_REMOTE_CTRL] = "ASF Remote Control",
+	[FRU_MR_ASF_FIXED_SMBUS] = { "asf-smbus", "ASF Fixed SMBus Addresses" },
+	[FRU_MR_ASF_LEGACY_ALERTS] = { "asf-legacy-alerts", "ASF Legacy-Device Alerts" },
+	[FRU_MR_ASF_REMOTE_CTRL] = { "asf-remote-control", "ASF Remote Control" },
 
-	[FRU_MR_EXT_DC_OUT] = "Extended DC Output",
-	[FRU_MR_EXT_DC_LOAD] = "Extended DC Load",
+	[FRU_MR_EXT_DC_OUT] = { "edcout", "Extended DC Output" },
+	[FRU_MR_EXT_DC_LOAD] = { "edcload", "Extended DC Load" },
 
-	[FRU_MR_NVME] = "NVMe Information",
-	[FRU_MR_NVME_PCIE_PORT] = "NVMe PCIe Port",
-	[FRU_MR_NVME_TOPOLOGY] = "NVMe Topolgy",
-	[FRU_MR_NVME_RSVD_E] = "NVMe Reserved",
-	[FRU_MR_NVME_RSVD_F] = "NVMe Reserved",
+	[FRU_MR_NVME] = { "nvme-info", "NVMe Information" },
+	[FRU_MR_NVME_PCIE_PORT] = { "nvme-pcie-port", "NVMe PCIe Port" },
+	[FRU_MR_NVME_TOPOLOGY] = { "nvme-topology", "NVMe Topology" },
+	[FRU_MR_NVME_RSVD_E] = { "nvme-reserved-e", "NVMe Reserved" },
+	[FRU_MR_NVME_RSVD_F] = { "nvme-reserved-f", "NVMe Reserved" },
 
-	[FRU_MR_OEM_START + 0] = "OEM", /* 0xC0 */
-	[FRU_MR_OEM_START + 1] = "OEM", /* 0xC1 */
-	[FRU_MR_OEM_START + 2] = "OEM", /* 0xC2 */
-	[FRU_MR_OEM_START + 3] = "OEM", /* 0xC3 */
-	[FRU_MR_OEM_START + 4] = "OEM", /* 0xC4 */
-	[FRU_MR_OEM_START + 5] = "OEM", /* 0xC5 */
-	[FRU_MR_OEM_START + 6] = "OEM", /* 0xC6 */
-	[FRU_MR_OEM_START + 7] = "OEM", /* 0xC7 */
-	[FRU_MR_OEM_START + 8] = "OEM", /* 0xC8 */
-	[FRU_MR_OEM_START + 9] = "OEM", /* 0xC9 */
-	[FRU_MR_OEM_START + 10] = "OEM", /* 0xCA */
-	[FRU_MR_OEM_START + 11] = "OEM", /* 0xCB */
-	[FRU_MR_OEM_START + 12] = "OEM", /* 0xCC */
-	[FRU_MR_OEM_START + 13] = "OEM", /* 0xCD */
-	[FRU_MR_OEM_START + 14] = "OEM", /* 0xCE */
-	[FRU_MR_OEM_START + 15] = "OEM", /* 0xCF */
-	[FRU_MR_OEM_START + 16] = "OEM", /* 0xD0 */
-	[FRU_MR_OEM_START + 17] = "OEM", /* 0xD1 */
-	[FRU_MR_OEM_START + 18] = "OEM", /* 0xD2 */
-	[FRU_MR_OEM_START + 19] = "OEM", /* 0xD3 */
-	[FRU_MR_OEM_START + 20] = "OEM", /* 0xD4 */
-	[FRU_MR_OEM_START + 21] = "OEM", /* 0xD5 */
-	[FRU_MR_OEM_START + 22] = "OEM", /* 0xD6 */
-	[FRU_MR_OEM_START + 23] = "OEM", /* 0xD7 */
-	[FRU_MR_OEM_START + 24] = "OEM", /* 0xD8 */
-	[FRU_MR_OEM_START + 25] = "OEM", /* 0xD9 */
-	[FRU_MR_OEM_START + 26] = "OEM", /* 0xDA */
-	[FRU_MR_OEM_START + 27] = "OEM", /* 0xDB */
-	[FRU_MR_OEM_START + 28] = "OEM", /* 0xDC */
-	[FRU_MR_OEM_START + 29] = "OEM", /* 0xDD */
-	[FRU_MR_OEM_START + 30] = "OEM", /* 0xDE */
-	[FRU_MR_OEM_START + 31] = "OEM", /* 0xDF */
-	[FRU_MR_OEM_START + 32] = "OEM", /* 0xE0 */
-	[FRU_MR_OEM_START + 33] = "OEM", /* 0xE1 */
-	[FRU_MR_OEM_START + 34] = "OEM", /* 0xE2 */
-	[FRU_MR_OEM_START + 35] = "OEM", /* 0xE3 */
-	[FRU_MR_OEM_START + 36] = "OEM", /* 0xE4 */
-	[FRU_MR_OEM_START + 37] = "OEM", /* 0xE5 */
-	[FRU_MR_OEM_START + 38] = "OEM", /* 0xE6 */
-	[FRU_MR_OEM_START + 39] = "OEM", /* 0xE7 */
-	[FRU_MR_OEM_START + 40] = "OEM", /* 0xE8 */
-	[FRU_MR_OEM_START + 41] = "OEM", /* 0xE9 */
-	[FRU_MR_OEM_START + 42] = "OEM", /* 0xEA */
-	[FRU_MR_OEM_START + 43] = "OEM", /* 0xEB */
-	[FRU_MR_OEM_START + 44] = "OEM", /* 0xEC */
-	[FRU_MR_OEM_START + 45] = "OEM", /* 0xED */
-	[FRU_MR_OEM_START + 46] = "OEM", /* 0xEE */
-	[FRU_MR_OEM_START + 47] = "OEM", /* 0xEF */
-	[FRU_MR_OEM_START + 48] = "OEM", /* 0xF0 */
-	[FRU_MR_OEM_START + 49] = "OEM", /* 0xF1 */
-	[FRU_MR_OEM_START + 50] = "OEM", /* 0xF2 */
-	[FRU_MR_OEM_START + 51] = "OEM", /* 0xF3 */
-	[FRU_MR_OEM_START + 52] = "OEM", /* 0xF4 */
-	[FRU_MR_OEM_START + 53] = "OEM", /* 0xF5 */
-	[FRU_MR_OEM_START + 54] = "OEM", /* 0xF6 */
-	[FRU_MR_OEM_START + 55] = "OEM", /* 0xF7 */
-	[FRU_MR_OEM_START + 56] = "OEM", /* 0xF8 */
-	[FRU_MR_OEM_START + 57] = "OEM", /* 0xF9 */
-	[FRU_MR_OEM_START + 58] = "OEM", /* 0xFA */
-	[FRU_MR_OEM_START + 59] = "OEM", /* 0xFB */
-	[FRU_MR_OEM_START + 60] = "OEM", /* 0xFC */
-	[FRU_MR_OEM_START + 61] = "OEM", /* 0xFD */
-	[FRU_MR_OEM_START + 62] = "OEM", /* 0xFE */
-	[FRU_MR_OEM_END] = "OEM",        /* 0xFF */
-	
-	[FRU_MR_RAW] = "Unsupported (raw)"
+	[FRU_MR_OEM_START + 0] = { "oem-c0", "OEM" }, /* 0xC0 */
+	[FRU_MR_OEM_START + 1] = { "oem-c1", "OEM" }, /* 0xC1 */
+	[FRU_MR_OEM_START + 2] = { "oem-c2", "OEM" }, /* 0xC2 */
+	[FRU_MR_OEM_START + 3] = { "oem-c3", "OEM" }, /* 0xC3 */
+	[FRU_MR_OEM_START + 4] = { "oem-c4", "OEM" }, /* 0xC4 */
+	[FRU_MR_OEM_START + 5] = { "oem-c5", "OEM" }, /* 0xC5 */
+	[FRU_MR_OEM_START + 6] = { "oem-c6", "OEM" }, /* 0xC6 */
+	[FRU_MR_OEM_START + 7] = { "oem-c7", "OEM" }, /* 0xC7 */
+	[FRU_MR_OEM_START + 8] = { "oem-c8", "OEM" }, /* 0xC8 */
+	[FRU_MR_OEM_START + 9] = { "oem-c9", "OEM" }, /* 0xC9 */
+	[FRU_MR_OEM_START + 10] = { "oem-ca", "OEM" }, /* 0xCA */
+	[FRU_MR_OEM_START + 11] = { "oem-cb", "OEM" }, /* 0xCB */
+	[FRU_MR_OEM_START + 12] = { "oem-cc", "OEM" }, /* 0xCC */
+	[FRU_MR_OEM_START + 13] = { "oem-cd", "OEM" }, /* 0xCD */
+	[FRU_MR_OEM_START + 14] = { "oem-ce", "OEM" }, /* 0xCE */
+	[FRU_MR_OEM_START + 15] = { "oem-cf", "OEM" }, /* 0xCF */
+	[FRU_MR_OEM_START + 16] = { "oem-d0", "OEM" }, /* 0xD0 */
+	[FRU_MR_OEM_START + 17] = { "oem-d1", "OEM" }, /* 0xD1 */
+	[FRU_MR_OEM_START + 18] = { "oem-d2", "OEM" }, /* 0xD2 */
+	[FRU_MR_OEM_START + 19] = { "oem-d3", "OEM" }, /* 0xD3 */
+	[FRU_MR_OEM_START + 20] = { "oem-d4", "OEM" }, /* 0xD4 */
+	[FRU_MR_OEM_START + 21] = { "oem-d5", "OEM" }, /* 0xD5 */
+	[FRU_MR_OEM_START + 22] = { "oem-d6", "OEM" }, /* 0xD6 */
+	[FRU_MR_OEM_START + 23] = { "oem-d7", "OEM" }, /* 0xD7 */
+	[FRU_MR_OEM_START + 24] = { "oem-d8", "OEM" }, /* 0xD8 */
+	[FRU_MR_OEM_START + 25] = { "oem-d9", "OEM" }, /* 0xD9 */
+	[FRU_MR_OEM_START + 26] = { "oem-da", "OEM" }, /* 0xDA */
+	[FRU_MR_OEM_START + 27] = { "oem-db", "OEM" }, /* 0xDB */
+	[FRU_MR_OEM_START + 28] = { "oem-dc", "OEM" }, /* 0xDC */
+	[FRU_MR_OEM_START + 29] = { "oem-dd", "OEM" }, /* 0xDD */
+	[FRU_MR_OEM_START + 30] = { "oem-de", "OEM" }, /* 0xDE */
+	[FRU_MR_OEM_START + 31] = { "oem-df", "OEM" }, /* 0xDF */
+	[FRU_MR_OEM_START + 32] = { "oem-e0", "OEM" }, /* 0xE0 */
+	[FRU_MR_OEM_START + 33] = { "oem-e1", "OEM" }, /* 0xE1 */
+	[FRU_MR_OEM_START + 34] = { "oem-e2", "OEM" }, /* 0xE2 */
+	[FRU_MR_OEM_START + 35] = { "oem-e3", "OEM" }, /* 0xE3 */
+	[FRU_MR_OEM_START + 36] = { "oem-e4", "OEM" }, /* 0xE4 */
+	[FRU_MR_OEM_START + 37] = { "oem-e5", "OEM" }, /* 0xE5 */
+	[FRU_MR_OEM_START + 38] = { "oem-e6", "OEM" }, /* 0xE6 */
+	[FRU_MR_OEM_START + 39] = { "oem-e7", "OEM" }, /* 0xE7 */
+	[FRU_MR_OEM_START + 40] = { "oem-e8", "OEM" }, /* 0xE8 */
+	[FRU_MR_OEM_START + 41] = { "oem-e9", "OEM" }, /* 0xE9 */
+	[FRU_MR_OEM_START + 42] = { "oem-ea", "OEM" }, /* 0xEA */
+	[FRU_MR_OEM_START + 43] = { "oem-eb", "OEM" }, /* 0xEB */
+	[FRU_MR_OEM_START + 44] = { "oem-ec", "OEM" }, /* 0xEC */
+	[FRU_MR_OEM_START + 45] = { "oem-ed", "OEM" }, /* 0xED */
+	[FRU_MR_OEM_START + 46] = { "oem-ee", "OEM" }, /* 0xEE */
+	[FRU_MR_OEM_START + 47] = { "oem-ef", "OEM" }, /* 0xEF */
+	[FRU_MR_OEM_START + 48] = { "oem-f0", "OEM" }, /* 0xF0 */
+	[FRU_MR_OEM_START + 49] = { "oem-f1", "OEM" }, /* 0xF1 */
+	[FRU_MR_OEM_START + 50] = { "oem-f2", "OEM" }, /* 0xF2 */
+	[FRU_MR_OEM_START + 51] = { "oem-f3", "OEM" }, /* 0xF3 */
+	[FRU_MR_OEM_START + 52] = { "oem-f4", "OEM" }, /* 0xF4 */
+	[FRU_MR_OEM_START + 53] = { "oem-f5", "OEM" }, /* 0xF5 */
+	[FRU_MR_OEM_START + 54] = { "oem-f6", "OEM" }, /* 0xF6 */
+	[FRU_MR_OEM_START + 55] = { "oem-f7", "OEM" }, /* 0xF7 */
+	[FRU_MR_OEM_START + 56] = { "oem-f8", "OEM" }, /* 0xF8 */
+	[FRU_MR_OEM_START + 57] = { "oem-f9", "OEM" }, /* 0xF9 */
+	[FRU_MR_OEM_START + 58] = { "oem-fa", "OEM" }, /* 0xFA */
+	[FRU_MR_OEM_START + 59] = { "oem-fb", "OEM" }, /* 0xFB */
+	[FRU_MR_OEM_START + 60] = { "oem-fc", "OEM" }, /* 0xFC */
+	[FRU_MR_OEM_START + 61] = { "oem-fd", "OEM" }, /* 0xFD */
+	[FRU_MR_OEM_START + 62] = { "oem-fe", "OEM" }, /* 0xFE */
+	[FRU_MR_OEM_END] = { "oem-ff", "OEM" },        /* 0xFF */
+
+	[FRU_MR_RAW] = { "custom", "Unsupported (raw)" }
 };
 
 /*
@@ -870,7 +870,7 @@ void print_mr_area(FILE ** fp, size_t mr_index, fru_mr_rec_t * mr_rec)
 	}
 	fprintf(*fp,
 	        "   #%zu: %s (0x%02hhX)%s\n", LIST_INDEX_FRUGEN(mr_index),
-	        mr_type_names[mr_type], (uint8_t)mr_type,
+	        frugen_mr_type_names[mr_type].human, (uint8_t)mr_type,
 	        (mr_rec->type == FRU_MR_RAW)
 	        ? " - Decoding unsupported yet:"
 	        : ""
@@ -1270,7 +1270,7 @@ int main(int argc, char * argv[])
 	switch (config.outformat) {
 #ifdef __HAS_JSON__
 	case FRUGEN_FMT_JSON:
-		save_to_json_file(&fp, fname, fru);
+		frugen_savefile_json(&fp, fname, fru);
 		break;
 #endif
 	case FRUGEN_FMT_TEXTOUT:
