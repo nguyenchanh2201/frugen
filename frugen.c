@@ -1241,6 +1241,9 @@ int main(int argc, char * argv[])
 	}
 	fru_free(fru);
 	fru = fru_loadbuffer(NULL, frubuf, fullsize, FRU_NOFLAGS);
+	free(frubuf);
+	frubuf = NULL;
+
 	if (!fru) {
 		fru_fatal("Failed to decode the FRU encoded from provided data");
 	}
