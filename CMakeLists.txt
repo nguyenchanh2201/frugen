@@ -46,14 +46,12 @@ if(MSVC)
 	# warning level 4
 	add_compile_options(/W4)
 else(MSVC)
+	set(CMAKE_C_FLAGS_RELEASE "-Os")
+	set(CMAKE_C_FLAGS_DEBUG "-g3 -O0")
 	# Enable static analyzer for gcc 13+
 	# It still may produce some falso positives, but it's quite decent already.
 	if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "13.0")
-		set(CMAKE_C_FLAGS_RELEASE "-Os -fanalyzer")
-		set(CMAKE_C_FLAGS_DEBUG "-g3 -O0 -fanalyzer")
-	else()
-		set(CMAKE_C_FLAGS_RELEASE "-Os")
-		set(CMAKE_C_FLAGS_DEBUG "-g3 -O0")
+		add_compile_options(-fanalyzer)
 	endif()
 	# additional warnings
 	add_compile_options(
