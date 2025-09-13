@@ -281,7 +281,7 @@ const frugen_name_t product_fields[FRU_PROD_FIELD_COUNT] = {
 	[FRU_PROD_MFG] = { "mfg", "Manufacturer" },
 	[FRU_PROD_NAME] = { "pname", "Product Name" },
 	[FRU_PROD_MODELPN] = { "pn", "Part/Model Number" },
-	[FRU_PROD_VERSION] = { "version", "Version" },
+	[FRU_PROD_VERSION] = { "ver", "Version" },
 	[FRU_PROD_SERIAL] = { "serial", "Serial Number" },
 	[FRU_PROD_ASSET] = { "atag", "Asset Tag" },
 	[FRU_PROD_FILE] = { "file", "FRU File ID" },
@@ -796,7 +796,7 @@ void load_fromfile(const char * fname,
 
 void print_info_area(FILE ** fp, const fru_t * fru, fru_area_type_t atype)
 {
-	const char * const aname = area_names[atype].human;
+	const char * const aname = area_names[atype].json;
 
 	/* First print area-specific non-string fields */
 	if (FRU_CHASSIS_INFO == atype) {
@@ -828,6 +828,7 @@ void print_info_area(FILE ** fp, const fru_t * fru, fru_area_type_t atype)
 	}
 
 	/* Then print out the mandatory fields */
+	const fru_field_t * field = NULL;
 	for (size_t i = 0; i < field_max[atype]; i++) {
 		const char * const name = field_name[atype][i].human;
 		const fru_field_t * field = fru_getfield(fru, atype, i);
@@ -846,7 +847,6 @@ void print_info_area(FILE ** fp, const fru_t * fru, fru_area_type_t atype)
 	}
 
 	int idx = FRU_LIST_HEAD;
-	fru_field_t * field = NULL;
 	while ((field = fru_get_custom(fru, atype, idx))) {
 		const char * encoding = frugen_enc_name_by_val(field->enc);
 		fprintf(*fp, "   %22s %2d: [%9s] \"%s\"\n",

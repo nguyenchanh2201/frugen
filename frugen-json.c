@@ -98,40 +98,16 @@ bool load_info_fields(fru_t * fru, fru_area_type_t atype,
 {
 	bool rc = false;
 	json_object *jsfield;
-	const char * const jsnames[FRU_INFO_AREAS][FRU_MAX_FIELD_COUNT] = {
-		[FRU_INFOIDX(CHASSIS)] = {
-			"pn",
-			"serial"
-		},
-		[FRU_INFOIDX(BOARD)] = {
-			"mfg",
-			"pname",
-			"serial",
-			"pn",
-			"file"
-		},
-		[FRU_INFOIDX(PRODUCT)] = {
-			"mfg",
-			"pname",
-			"pn",
-			"ver",
-			"serial",
-			"atag",
-			"file"
-		}
-	};
 
 	/* First load mandatory fields */
 
-	size_t field_idx = FRU_LIST_HEAD;
 	fru_field_t * field;
-	int infoidx = FRU_ATYPE_TO_INFOIDX(atype);
 	while (infoidx >= 0 && (field = fru_getfield(fru, atype, field_idx))) {
-		const char * jsname = jsnames[infoidx][field_idx];
+		const char * const jsname = field_name[atype][i].json;
 		if (!json_object_object_get_ex(jso, jsname, &jsfield)) {
 			debug(2, "Field '%s' not found for area '%s', skipping",
 			      jsname, area_names[atype].json);
-			goto nextloop;
+			continue;
 		}
 
 		if (!load_single_field(field, jsfield)) {
@@ -139,8 +115,6 @@ bool load_info_fields(fru_t * fru, fru_area_type_t atype,
 			goto out;
 		}
 
-	nextloop:
-		field_idx++;
 		debug(2, "Field '%s' = '%s' (%s) loaded from JSON",
 		      jsname, field->val, frugen_enc_name_by_val(field->enc));
 	}
@@ -584,7 +558,6 @@ void add_info_area_json(struct json_object * jso,
 
 	struct json_object * section = json_object_new_object();
 
-	const fru_field_t * field = NULL;
 	const char * const aname = area_names[atype].json;
 
 	/* Add area-specific fields */
@@ -620,6 +593,7 @@ void add_info_area_json(struct json_object * jso,
 	}
 
 	/* Add standard fields */
+	const fru_field_t * field = NULL;
 	for (size_t i = 0; i < field_max[atype]; i++) {
 		const char * const name = field_name[atype][i].json;
 		field = fru_getfield(fru, atype, i);
