@@ -796,8 +796,6 @@ void load_fromfile(const char * fname,
 
 void print_info_area(FILE ** fp, const fru_t * fru, fru_area_type_t atype)
 {
-	const char * const aname = area_names[atype].json;
-
 	/* First print area-specific non-string fields */
 	if (FRU_CHASSIS_INFO == atype) {
 		fprintf(*fp, "   %25s: %11s %d\n",
@@ -829,12 +827,8 @@ void print_info_area(FILE ** fp, const fru_t * fru, fru_area_type_t atype)
 
 	/* Then print out the mandatory fields */
 	const fru_field_t * field = NULL;
-	for (size_t i = 0; i < field_max[atype]; i++) {
+	FRU_FOREACH_INFOFIELD(fru, atype, field, i) {
 		const char * const name = field_name[atype][i].human;
-		const fru_field_t * field = fru_getfield(fru, atype, i);
-		if (!field)
-			fru_fatal("Failed to get standard field '%s' from '%s'", name, aname);
-
 		const char * encoding = frugen_enc_name_by_val(field->enc);
 		fprintf(*fp, "   %25s: [%9s] \"%s\"\n",
 		        name, encoding,
@@ -846,13 +840,11 @@ void print_info_area(FILE ** fp, const fru_t * fru, fru_area_type_t atype)
 		return;
 	}
 
-	int idx = FRU_LIST_HEAD;
-	while ((field = fru_get_custom(fru, atype, idx))) {
+	FRU_FOREACH_INFOCUSTOM(fru, atype, field, idx) {
 		const char * encoding = frugen_enc_name_by_val(field->enc);
-		fprintf(*fp, "   %22s %2d: [%9s] \"%s\"\n",
+		fprintf(*fp, "   %22s %2zd: [%9s] \"%s\"\n",
 		        "Custom", LIST_INDEX_FRUGEN(idx),
 		        encoding, field->val);
-		idx++;
 	}
 	if (fru_errno.code != FENOFIELD) {
 		fru_perror(*fp, "   Error getting custom fields");

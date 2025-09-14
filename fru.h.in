@@ -202,6 +202,54 @@
 #define FRU_FOREACH_INFOIDX(it) for ((it) = 0; (it) <= FRU_INFO_AREAS; (it)++)
 
 /**
+ * Iterate through all info area standard fields within the given \a atype
+ * info area of the given \a fru. Use \a f as the field pointer,
+ * and \t idx as the index counter.
+ *
+ * Make sure \a f is declared as \ref fru_field_t.
+ * Do NOT declare \a idx.
+ *
+ * @b Example
+ * ```.c
+ * fru_t * fru = fru_init(NULL);
+ * fru_field_t * field;
+ * FRU_FOREACH_INFOFIELD(fru, FRU_CHASSIS_INFO, field, i) {
+ *     // Here field is non-NULL and points to a fru_field_t structure
+ *     // correspondigh to the standard field at index i in
+ *     // Chassis Info area within fru
+ * }
+ * ```
+ */
+#define FRU_FOREACH_INFOFIELD(fru, atype, f, idx) \
+	for (size_t idx = FRU_LIST_HEAD; \
+	     (f = fru_getfield(fru, atype, idx)); \
+	     idx++)
+
+/**
+ * Iterate through all info area custom fields within the given \a atype
+ * info area of the given \a fru. Use \a f as the field pointer,
+ * and \t idx as the index counter.
+ *
+ * Make sure \a f is declared as \ref fru_field_t.
+ * Do NOT declare \a idx.
+ *
+ * @b Example
+ * ```.c
+ * fru_t * fru = fru_init(NULL);
+ * fru_field_t * field;
+ * FRU_FOREACH_INFOCUSTOM(fru, FRU_CHASSIS_INFO, field, i) {
+ *     // Here field is non-NULL and points to a fru_field_t structure
+ *     // corresponding to the custom field at index i in
+ *     // Chassis Info area within fru
+ * }
+ * ```
+ */
+#define FRU_FOREACH_INFOCUSTOM(fru, atype, f, idx) \
+	for (size_t idx = FRU_LIST_HEAD; \
+	     (f = fru_get_custom(fru, atype, idx)); \
+	     idx++)
+
+/**
  * @brief Field encoding type.
  *
  * This enum contains values as per Section 13 of IPMI FRU Specification,

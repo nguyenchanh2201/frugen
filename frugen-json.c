@@ -102,7 +102,7 @@ bool load_info_fields(fru_t * fru, fru_area_type_t atype,
 	/* First load mandatory fields */
 
 	fru_field_t * field;
-	while (infoidx >= 0 && (field = fru_getfield(fru, atype, field_idx))) {
+	FRU_FOREACH_INFOFIELD(fru, atype, field, i) {
 		const char * const jsname = field_name[atype][i].json;
 		if (!json_object_object_get_ex(jso, jsname, &jsfield)) {
 			debug(2, "Field '%s' not found for area '%s', skipping",
@@ -594,11 +594,8 @@ void add_info_area_json(struct json_object * jso,
 
 	/* Add standard fields */
 	const fru_field_t * field = NULL;
-	for (size_t i = 0; i < field_max[atype]; i++) {
+	FRU_FOREACH_INFOFIELD(fru, atype, field, i) {
 		const char * const name = field_name[atype][i].json;
-		field = fru_getfield(fru, atype, i);
-		if (!field)
-			fru_fatal("Failed to get standard field '%s' from '%s'", name, aname);
 
 		if (!add_info_field(section, name, field))
 			fatal("Failed to add field %s.%s to JSON", aname, name);
