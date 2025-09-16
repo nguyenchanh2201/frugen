@@ -1142,13 +1142,35 @@ bool fru_move_area(fru_t * fru,
 /**
  * @brief Encode a FRU info structure into a binary buffer
  *
- * If \a buf is \p NULL, allocates a new one.
+ * If the pointer at \a bufptr is \p NULL, allocates a new one
+ * and saves it to \a bufptr. \a bufptr itself must NOT be \p NULL.
+ *
  * Always calculates the resulting size and stores it in \a size
  * in the event of successful completion.
  *
+ * The caller is responsible for freeing the allocated buffer
+ * with free() if automatic allocation was requested.
+ *
+ * Example:
+ * ```
+ * uint8_t * buffer = NULL;
+ * size_t bufsize = 0;
+ * if (!fru_savebuffer(&buffer, &bufsize, fru)) {
+ *     // Handle the error using fru_errno
+ *     exit(1);
+ * }
+ * printf("FRU data saved as %zd bytes\n", bufsize);
+ * // Do some buffer processing
+ * ...
+ * // Now free the buffer
+ * free(buffer);
+ * buffer = NULL;
+ * ```
+ *
  * @param[in] fru The FRU information structure to encode/export
- * @param[in,out] bufptr Pointer to a buffer to save the binary FRU
- *                       information file to (allocated if \p NULL)
+ * @param[in,out] bufptr Pointer to a pointer to a buffer to save
+ *                       the binary FRU information file to.
+ *                       The target pointer is allocated if \p NULL.
  * @param[in,out] size Pointer to the size of the output buffer
  *                     (size is adjusted upon return to the actual
  *                     size of the encoded data).
