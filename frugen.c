@@ -616,7 +616,7 @@ void fru_perror(FILE *fp, const char *fmt, ...)
 		area_names[FRU_MR].human,
 		"FRU",
 		"frugen",
-		"system",
+		"system call",
 	};
 	va_list args;
 	va_start(args, fmt);
@@ -626,7 +626,7 @@ void fru_perror(FILE *fp, const char *fmt, ...)
 	        fru_strerr(fru_errno),
 	        sources[fru_errno.src]);
 
-	if (fru_errno.src != FERR_LOC_GENERAL && fru_errno.src != FERR_LOC_CALLER)
+	if (fru_errno.src != FERR_LOC_GENERAL && fru_errno.src != FERR_LOC_CALLER && fru_errno.src != FERR_LOC_SYSTEM)
 		fprintf(fp, "Area ");
 
 	if (fru_errno.index >= 0) {
