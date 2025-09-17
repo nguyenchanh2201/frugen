@@ -32,7 +32,7 @@ typedef enum {
     FESIZE,          /**< Data size mismatch */
     FEHDRVER,        /**< Bad header version */
     FEHDRCKSUM,      /**< Bad header checksum */
-    FEHDRBADPTR,     /**< Area pointer beyond the end of file/buffer */
+    FEHDRBADPTR,     /**< Area starts/spans beyond the end of file/buffer or overlaps next area */
     FEDATACKSUM,     /**< Bad data checksum */
     FEAREADUP,       /**< Duplicate area in area order */
     FEAREANOTSUP,    /**< Unsupported area type (For a particular operation) */
