@@ -7,7 +7,7 @@ Example:
 ```
 OST=ubuntu
 OSV=noble
-docker --build-arg osver=$OSV -t frugen-buildenv:$OST-$OSV -f Dockerfile.$OST .
+docker --build-arg ostype=$OST --build-arg osver=$OSV -t frugen-buildenv:$OST-$OSV .
 ```
 
 Supported OS types:
