@@ -29,6 +29,7 @@
 #include <time.h>
 #include <sys/types.h>
 
+#include "fru.h"
 #include "fru_errno.h"
 #include "frugen.h"
 #include "smbios.h"

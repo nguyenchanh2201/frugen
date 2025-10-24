@@ -6,6 +6,13 @@
  */
 #pragma once
 
+#if defined(__GNUC__) && __GNUC__ < 13
+#define FRU_THREAD_LOCAL __thread
+#else
+// Any other C23-compliant compiler
+#define FRU_THREAD_LOCAL thread_local
+#endif
+
 /**
  * @addtogroup common
  * @brief Common definitions for the library
@@ -111,7 +118,7 @@ typedef struct {
  *
  * Please also see \ref fru_strerr()
  */
-extern thread_local fru_errno_t fru_errno;
+extern FRU_THREAD_LOCAL fru_errno_t fru_errno;
 
 /**
  * @brief Get a description of the given \p fru_errno value.
