@@ -301,6 +301,10 @@ bool load_mr_record(fru_t * fru,
 
 	debug(3, "Record is of type '%s'", type);
 	for (size_t i = 0; i < FRU_MR_TYPE_COUNT; i++) {
+		if (!frugen_mr_type_names[i].json) {
+			// Skip reserved/zeroed entries
+			continue;
+		}
 		if (!strcmp(type, frugen_mr_type_names[i].json)) {
 			if (!mr_loader[i]) {
 				warn("Multirecord type '%s' is not supported in JSON", type);
