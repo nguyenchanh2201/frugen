@@ -211,7 +211,7 @@ bool encode_bcdplus(fru__file_field_t * out,
 {
 	size_t len = strlen(s);
 	size_t lenbcd = (len + 1) / 2; /* Need an extra byte for a lone trailing nibble */
-	uint8_t c[2] = { 0 };
+	uint8_t c = 0;
 	size_t i = 0;
 
 	if (lenbcd > FRU__FIELDLEN(lenbcd))
@@ -222,29 +222,32 @@ bool encode_bcdplus(fru__file_field_t * out,
 	}
 
 	/* Copy the data and pack it as BCD */
-	for (; i < len; i++) {
+	for (; i < lenbcd * 2; i++) {
+		if (0 == (i % 2)) { // Reset BCD at each new output byte
+			out->data[i / 2] = 0;
+		}
 		switch(s[i]) {
 			case 0:
 				// The null-terminator encountered earlier than
 				// the end of the BCD field, encode as space
 			case ' ':
-				c[i % 2] = 0xA;
+				c = 0xA;
 				break;
 			case '-':
-				c[i % 2] = 0xB;
+				c = 0xB;
 				break;
 			case '.':
-				c[i % 2] = 0xC;
+				c = 0xC;
 				break;
 			default: // Digits
 				if (!isdigit(s[i])) {
 					fru__seterr(FERANGE, FERR_LOC_GENERAL, -1);
 					return false;
 			    }
-				c[i % 2] = s[i] - '0';
+				c = s[i] - '0';
 		}
 		if (out)
-			out->data[i / 2] = c[0] << 4 | c[1];
+			out->data[i / 2] |= c << (4 * (1 - i % 2));
 	}
 
 	if (out)
