@@ -865,6 +865,13 @@ bool fru_delete_custom(fru_t * fru,
 /** A convenience macro to get the size of an array in elements */
 #define FRU_ARRAY_SZ(a) (sizeof(a) / sizeof((a)[0]))
 
+/** A convenience macro to get the maximum possible value of a signed interger variable of any size */
+#define FRU_INTMAX(var) ((INTMAX_C(1) << (sizeof(var) * CHAR_BIT - 1)) - 1)
+/** A convenience macro to get the minimum possible value of a signed interger variable of any size */
+#define FRU_INTMIN(var) (-FRU_INTMAX(var) - 1)
+/** A convenience macro to get the maximum possible value of an unsigned interger variable of any size */
+#define FRU_UINTMAX(var) ((UINTMAX_C(1) << sizeof(var) * CHAR_BIT) - 1)
+
 /**
  * @brief Convert 2 first bytes of hex string into a binary byte.
  *
