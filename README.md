@@ -369,9 +369,8 @@ which is an extension to the standard JSON format.
 
 ### Linux
 
-    mkdir build && cd build
-    cmake ..
-    make
+    cmake -B build
+    make -C build
 
 There is a number of optional parameters for cmake to control build procedure:
 
@@ -382,23 +381,22 @@ There is a number of optional parameters for cmake to control build procedure:
 |BINARY_STATIC   | OFF   |Force full static linking of `frugen`, makes it HUGE                 |
 |ENABLE_JSON     | ON    |Enable JSON support if json-c library is available                   |
 |JSON_STATIC     | OFF   |Link json-c library statically into `frugen`                         |
+|LIBFRU_STATIC   | OFF   |Link fru library statically into `frugen`                            |
 
-**NOTE**: `BUILD_SHARED_LIB` and `BINARY_STATIC` are not mutually exclusive: while first option
-controls building `libfru`, second one is related to `frugen`. When both options are enabled
+**NOTE**: `BUILD_SHARED_LIB` and `BINARY_STATIC` are not mutually exclusive: while the first option
+controls building of `libfru`, the second one is related to `frugen`. When both options are enabled
 static and shared versions of `libfru` will be compiled. When both options are disabled libfru
 will be linked statically into `frugen`, while other libraries are linked shared.
 
 To build a debug version use the following command:
 
-    mkdir build && cd build
-    cmake -DCMAKE_BUILD_TYPE=Debug -DDEBUG_OUTPUT=yes ..
-    make
+    cmake -B build -DCMAKE_BUILD_TYPE=Debug -DDEBUG_OUTPUT=yes ..
+    make -C build
 
 To build a semi-statically linked version (with `libfru` and `libjson-c` built-in), use:
 
-    mkdir build && cd build
-    cmake -DBINARY_STATIC=ON -DJSON_STATIC=ON ..
-    make
+    cmake -B build -DLIBFRU_STATIC=ON -DJSON_STATIC=ON ..
+    make -C build
 
 To build project documentation (requies `doxygen`), run `make docs`.
 
