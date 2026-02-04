@@ -152,7 +152,7 @@ add_executable(frugen ${frugen_SOURCES})
 set_target_properties(frugen PROPERTIES C_VISIBILITY_PRESET default)
 
 if(ENABLE_JSON)
-	find_package(json-c CONFIG REQUIRED)
+	find_package(json-c CONFIG QUIET)
 
 # For debugging
 #	get_cmake_property(_variableNames VARIABLES)
@@ -163,28 +163,29 @@ if(ENABLE_JSON)
 
 	if(json-c_FOUND)
 		if(JSON_STATIC OR BINARY_STATIC)
-# TODO: Find a way to detect that static version is indeed present
-#       as it is missing in Fedora by default
-#			if (NOT json-c_STATIC_FOUND)
-#				message (WARNING "No STATIC json-c library available")
-#				set(ENABLE_JSON false)
-#			else ()
-				message(STATUS "Linking json-c library statically")
-				target_link_libraries(frugen json-c::json-c-static)
-#			endif ()
+			if (NOT TARGET json-c::json-c-static)
+				message(FATAL_ERROR
+				        " json-c static library not found. To disable JSON support,\n"
+				        " rerun cmake with `-DENABLE_JSON=no`\n"
+				        " To build with shared library, use `-DJSON_STATIC=no`")
+			endif ()
+			message(STATUS "Linking json-c library statically")
+			target_link_libraries(frugen json-c::json-c-static)
 		else ()
 			message(STATUS "Using shared json-c library")
 			target_link_libraries(frugen json-c::json-c)
 		endif ()
+	else ()
+		message(FATAL_ERROR
+		        " json-c library not found. To disable JSON support,\n"
+		        " rerun cmake with `-DENABLE_JSON=no`")
 	endif ()
 
-	if (ENABLE_JSON)
-		add_definitions(-D__HAS_JSON__)
-		list(APPEND frugen_SOURCES frugen-json.c)
-		set_target_properties(frugen PROPERTIES SOURCES "${frugen_SOURCES}")
-	else ()
-		message (WARNING "JSON library support *disabled*!")
-	endif ()
+	add_definitions(-D__HAS_JSON__)
+	list(APPEND frugen_SOURCES frugen-json.c)
+	set_target_properties(frugen PROPERTIES SOURCES "${frugen_SOURCES}")
+else ()
+	message (WARNING "JSON support is *disabled*")
 endif(ENABLE_JSON)
 
 list(APPEND ALL_TARGETS ${LIB_TARGETS} "frugen")
