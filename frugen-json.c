@@ -20,36 +20,6 @@
 #include "fru_errno.h"
 #include "frugen-json.h"
 
-#if (JSON_C_MAJOR_VERSION == 0 && JSON_C_MINOR_VERSION < 13)
-#include <string.h>
-static // Don't export the local definition
-int
-json_object_to_fd(int fd, struct json_object *obj, int flags)
-{
-	// implementation is copied from json-c v0.13 with minor refactoring
-	int ret;
-	const char *json_str;
-	size_t pos, size;
-
-	if (!(json_str = json_object_to_json_string_ext(obj, flags))) {
-		return -1;
-	}
-
-	size = strlen(json_str);
-	pos = 0;
-	while(pos < size) {
-		if((ret = write(fd, json_str + pos, size - pos)) < 0) {
-			return -1;
-		}
-
-		/* because of the above check for ret < 0, we can safely add */
-		pos += ret;
-	}
-
-	return 0;
-}
-#endif
-
 static
 bool load_single_field(fru_field_t * field, json_object * jsfield)
 {
