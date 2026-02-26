@@ -331,7 +331,7 @@ const char * frugen_enc_name_by_val(fru_field_enc_t enc)
 fru_field_enc_t frugen_enc_by_name(const char * name)
 {
 	debug(4, "Looking for encoding '%s'", name);
-	for (fru_field_enc_t i = 0; i <= FRU_FE_AUTO; i++) {
+	for (fru_field_enc_t i = 0; name && i <= FRU_FE_AUTO; i++) {
 		if (!strcmp(name, frugen_enc_names[i])) {
 			debug(4, "Encoding '%s' is definitely %d", name, i);
 			return i;

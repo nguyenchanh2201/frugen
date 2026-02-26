@@ -27,23 +27,34 @@ bool load_single_field(fru_field_t * field, json_object * jsfield)
 
 	// jsfield is either an object or a string.
 	// First assume it's an object with 'type' and 'data' fields.
-	json_object *typefield, *valfield;
+	json_object *typefield = NULL, *valfield = NULL;
 	const char * val;
 	fru_field_enc_t encoding = FRU_FE_UNKNOWN;
-	if (json_object_object_get_ex(jsfield, "type", &typefield) &&
-	    json_object_object_get_ex(jsfield, "data", &valfield))
+	if (json_object_object_get_ex(jsfield, "data", &valfield))
 	{
-		// expected subfields are type and val
-		const char * type = json_object_get_string(typefield);
+		// expected subfields are type and data
+		// by default assume that there is no type, which means 'auto'
+		const char * type = NULL;
+		if (json_object_object_get_ex(jsfield, "type", &typefield)
+		    && !json_object_is_type(typefield, json_type_null))
+		{
+			type = json_object_get_string(typefield);
+		}
+
+		debug(2, "Field has a specified type '%s'", type);
 		val = json_object_get_string(valfield);
 		encoding = frugen_enc_by_name(type);
 		if (FRU_FE_UNKNOWN == encoding) {
-			warn("Unknown encoding type '%s', using 'auto'", type);
+			if (type)
+				warn("Unknown encoding type '%s', using 'auto'", type);
+			else
+				debug(2, "Using auto encoding");
 			encoding = FRU_FE_AUTO;
 		}
 	} else {
 		// Apparently, jsfield is not an object.
 		// It must be a string then.
+		debug(2, "Field is a plain string");
 		encoding = FRU_FE_AUTO;
 		val = json_object_get_string(jsfield);
 		if (!val) {
@@ -74,6 +85,7 @@ bool load_info_fields(fru_t * fru, fru_area_type_t atype,
 	fru_field_t * field;
 	FRU_FOREACH_INFOFIELD(fru, atype, field, i) {
 		const char * const jsname = field_name[atype][i].json;
+		debug(2, "Checking field '%s'", jsname);
 		if (!json_object_object_get_ex(jso, jsname, &jsfield)) {
 			debug(2, "Field '%s' not found for area '%s', skipping",
 			      jsname, area_names[atype].json);
@@ -115,6 +127,8 @@ bool load_info_fields(fru_t * fru, fru_area_type_t atype,
 		if (!item)
 			continue;
 
+		debug(2, "Checking custom field %zu", LIST_INDEX_FRUGEN(i));
+
 		if (!load_single_field(&field, item)) {
 			warn("Failed to load custom field %zu", LIST_INDEX_FRUGEN(i));
 			goto out;
@@ -126,6 +140,7 @@ bool load_info_fields(fru_t * fru, fru_area_type_t atype,
 		}
 
 		debug(2, "Custom field %zu has been loaded from JSON", LIST_INDEX_FRUGEN(i));
+		debug(2, "Custom field %zu value: '%s'", LIST_INDEX_FRUGEN(i), field.val);
 	}
 
 	rc = true;
