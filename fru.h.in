@@ -687,11 +687,12 @@ bool fru_setfield(fru_field_t * field,
 
 /**
  * @brief Copy a binary input buffer into the given field,
- *        perform length check, truncate if needed
+ *        perform length check, truncate if needed,
+ *        encode binary as a hex string
  *
  * Unlike \ref fru_setfield() that takes an input string and an encoding
  * type, this function takes a binary buffer and its size as an input.
- * It the converts the buffer into a hex string, and sets the \a field
+ * It then converts the buffer into a hex string, and sets the \a field
  * encoding type to \ref FRU_FE_BINARY.
  *
  * If the input buffer size is too large to fit into a field (that is,
@@ -1249,7 +1250,11 @@ typedef enum {
 	FRU_MR_EMPTY, /**< MR Record is empty, will be skipped during saving */
 } fru_mr_type_t;
 
-/** The FRU_MR_RAW is not considered a valid type, must be checked separately */
+/**
+ * @brief Check if MR record type \t is valid.
+ *        \ref FRU_MR_RAW is not considered a valid type,
+ *        must be checked separately.
+ */
 #define FRU_MR_IS_VALID_TYPE(t) (FRU_MR_MIN <= (t) && (t) <= FRU_MR_MAX)
 
 /** The total number of possible OEM types to Multirecord area records */
@@ -1509,17 +1514,17 @@ typedef struct {
 		/** TODO: Not yet implemented */
 		struct {
 			uint8_t type; /**< The actual record Type */
-			fru_field_enc_t enc; /**< OEM data encoding
-									*
-									* Supported are:
-									*   - \ref FRU_FE_TEXT (plain text, Latin1 only, auto \a len)
-									*   - \ref FRU_FE_BINARY (hex string data)
-									*
-									* Functions fru_load_file() and fru_load_buffer() always
-									* load the otherwise unsupported records as `raw` and always
-									* autodetect the encoding of such records, seting \a enc field
-									* accordingly.
-									*/
+			fru_field_enc_t enc; /**< Raw data encoding
+			                      *
+			                      * Supported are:
+			                      *   - \ref FRU_FE_TEXT (plain text, Latin1 only, auto \a len)
+			                      *   - \ref FRU_FE_BINARY (hex string data)
+			                      *
+			                      * Functions fru_load_file() and fru_load_buffer() always
+			                      * load the otherwise unsupported records as `raw` and always
+			                      * autodetect the encoding of such records, seting \a enc field
+			                      * accordingly.
+			                      */
 			char data[FRU_MRR_RAW_MAXDATA]; /**< Raw data */
 		} raw;
 	};
