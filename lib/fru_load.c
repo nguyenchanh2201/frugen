@@ -295,29 +295,6 @@ bool decode_info_area(fru_t * fru,
 		(fru__info_area_t *)&fru->product,
 	};
 
-	fru_field_t * out_field[FRU_TOTAL_AREAS][FRU_MAX_FIELD_COUNT] = {
-		[FRU_CHASSIS_INFO] = {
-			&fru->chassis.pn,
-			&fru->chassis.serial,
-		},
-		[FRU_BOARD_INFO] = {
-			&fru->board.mfg,
-			&fru->board.pname,
-			&fru->board.serial,
-			&fru->board.pn,
-			&fru->board.file,
-		},
-		[FRU_PRODUCT_INFO] = {
-			&fru->product.mfg,
-			&fru->product.pname,
-			&fru->product.pn,
-			&fru->product.ver,
-			&fru->product.serial,
-			&fru->product.atag,
-			&fru->product.file,
-		}
-	};
-
 	DEBUG("Decoding area type %d", atype);
 
 	if (file_area->ver != FRU__VER) {
@@ -374,8 +351,9 @@ bool decode_info_area(fru_t * fru,
 			return false;
 	}
 
-	for (size_t i = 0; i < fru__fieldcount[atype]; i++) {
-		if (!fru__decode_field(out_field[atype][i], field)) {
+	fru_field_t * outfield;
+	FRU_FOREACH_INFOFIELD(fru, atype, outfield, i) {
+		if (!fru__decode_field(outfield, field)) {
 			fru_errno.src = (fru_error_source_t)atype;
 			fru_errno.index = i;
 			return false;
@@ -447,13 +425,6 @@ bool decode_mr_mgmt_uuid(fru_mr_rec_t * rec,
 {
 	size_t i;
 	fru__uuid_t uuid;
-
-	/* Is this really a Management System UUID record? */
-	if (FRU__MGMT_MR_DATASIZE(FRU__UUID_SIZE) != file_rec->hdr.len)
-	{
-		fru__seterr(FEBADDATA, FERR_LOC_MR, -1);
-		return false;
-	}
 
 	/* This is the reversed operation of uuid2rec, SMBIOS-compatible
 	 * Little-Endian encoding in the input record is assumed.
