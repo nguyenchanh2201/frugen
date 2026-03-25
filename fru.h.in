@@ -598,6 +598,13 @@ typedef struct {
 	                                         *   order, please prefer using
 	                                         *   fru_move_area().
 	                                         */
+	size_t area_offset[FRU_TOTAL_AREAS]; /**< Fixed absolute byte offset for each area.
+	                                      *   If non-zero, indicates the area must start
+	                                      *   at this exact byte position in the FRU file.
+	                                      *   The gap between the current output position
+	                                      *   and this offset is filled with zero bytes.
+	                                      *   0 means no fixed offset (automatic layout).
+	                                      */
 	char * internal; ///< Internal use area as a hex string
 	fru_chassis_t chassis; ///< The chassis information structure
 	fru_board_t board; ///< The board information structure

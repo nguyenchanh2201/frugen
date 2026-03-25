@@ -553,6 +553,89 @@ static bool create_frufile(fru__file_t * frufile, size_t * size, const fru_t * f
 	void * outbuf = (void *)frufile;
 	size_t totalsize = sizeof(fru__file_t); // There is at least the header
 
+	// Check if any fixed offsets are specified
+	bool has_offsets = false;
+	for (fru_area_type_t i = FRU_MIN_AREA; i <= FRU_MAX_AREA; i++) {
+		if (fru->area_offset[i]) {
+			has_offsets = true;
+			break;
+		}
+	}
+
+	if (has_offsets) {
+		/*
+		 * Build a list of present areas and their fixed offsets.
+		 * First pass: just calculate sizes of each area (pretend they're at position 0)
+		 */
+		size_t area_sizes[FRU_TOTAL_AREAS] = { 0 };
+		size_t hdr_size = sizeof(fru__file_t);
+
+		bool (* encode_area[FRU_TOTAL_AREAS])(void *, size_t *,
+		                                      fru_area_type_t,
+		                                      const fru_t *) =
+		{
+			[FRU_INTERNAL_USE] = encode_iu_area,
+			[FRU_CHASSIS_INFO] = encode_info_area,
+			[FRU_BOARD_INFO]   = encode_info_area,
+			[FRU_PRODUCT_INFO] = encode_info_area,
+			[FRU_MR]           = encode_mr_area
+		};
+
+		// Calculate encoded sizes for each present area
+		for (fru_area_type_t atype = FRU_MIN_AREA; atype <= FRU_MAX_AREA; atype++) {
+			if (!fru->present[atype])
+				continue;
+			if (!encode_area[atype](NULL, &area_sizes[atype], atype, fru))
+				return false;
+		}
+
+		/*
+		 * Validate fixed offsets.
+		 * Offsets must be in increasing order and not overlap.
+		 */
+		for (fru_area_type_t atype = FRU_MIN_AREA; atype <= FRU_MAX_AREA; atype++) {
+			if (!fru->present[atype] || !fru->area_offset[atype])
+				continue;
+
+			size_t fixed_offset = fru->area_offset[atype];
+
+			// Check that offset is >= header size
+			if (fixed_offset < hdr_size) {
+				fru__seterr(FEGENERIC, FERR_LOC_GENERAL, -1);
+				DEBUG("Area offset %zu is less than header size %zu\n",
+				      fixed_offset, hdr_size);
+				return false;
+			}
+
+			// Find the next area offset (fixed or not)
+			size_t next_offset = 0;
+			for (fru_area_type_t next_atype = atype + 1; next_atype <= FRU_MAX_AREA; next_atype++) {
+				if (fru->present[next_atype]) {
+					if (fru->area_offset[next_atype]) {
+						next_offset = fru->area_offset[next_atype];
+					}
+					// If next area has no fixed offset, we'll calculate it dynamically
+					break;
+				}
+			}
+
+			// Calculate available space at this offset
+			// area size = area_sizes[atype]
+			// We need to make sure this area fits before next_offset
+
+			// For now, if next_offset is set, check that this area fits
+			if (next_offset > 0 && fixed_offset + area_sizes[atype] > next_offset) {
+				fru__seterr(FE2BIG, atype, -1);
+				DEBUG("Area %d at offset %zu with size %zu exceeds next offset %zu\n",
+				      atype, fixed_offset, area_sizes[atype], next_offset);
+				return false;
+			}
+		}
+
+		// Pre-validation passed. The actual gap bytes between areas are
+		// inserted in the encoding loop below.
+	}
+
 	bool (* encode_area[FRU_TOTAL_AREAS])(void *, size_t *,
 	                                      fru_area_type_t,
 	                                      const fru_t *) =
@@ -579,6 +662,25 @@ static bool create_frufile(fru__file_t * frufile, size_t * size, const fru_t * f
 		processed[type] = true;
 		if (!fru->present[type])
 			continue;
+
+		if (has_offsets && fru->area_offset[type]) {
+			size_t target_offset = fru->area_offset[type];
+			if (target_offset < totalsize) {
+				DEBUG("Area %d offset %zu is before current output size %zu\n",
+				      type, target_offset, totalsize);
+				fru__seterr(FE2BIG, type, -1);
+				return false;
+			}
+
+			size_t gap = target_offset - totalsize;
+			if (gap > 0) {
+				if (frufile) {
+					memset(area_out, 0, gap);
+					area_out += gap;
+				}
+				totalsize += gap;
+			}
+		}
 
 		// Encode the area and get back its encoded size in bytes (block-aligned)
 		size_t area_size;

@@ -59,6 +59,9 @@ static const struct option options[] = {
 	/* Set the output data format */
 	{ .name = "out-format",    .val = 'o', .has_arg = required_argument },
 
+	/* Fix absolute offset of specific areas */
+	{ .name = "area-offset",   .val = 'O', .has_arg = required_argument },
+
 	/* Set input file format to raw binary */
 	{ .name = "raw",          .val = 'r', .has_arg = required_argument },
 
@@ -134,6 +137,11 @@ static const char * const option_help[] = {
 	        ".\n\t\t         Default format when writing to stdout"
 #endif
 	        ,
+	['O'] = "Fix absolute byte offset for areas in the FRU file layout.\n\t\t"
+	        "Gaps before fixed offsets are filled with zero bytes. Format: <area>=<offset>[,<area>=<offset>].\n\t\t"
+	        "Area names: internal, chassis, board, product, multirecord.\n\t\t"
+	        "Offsets must not overlap; fail on data overflow.\n\t\t"
+	        "Example: --area-offset chassis=8,board=64,product=512",
 	['r'] = "Load FRU information from a raw binary file, use '-' for stdin",
 	['s'] = "Set a text field in an area to the given value, use given encoding\n\t\t"
 	        "Requires an argument in form [<encoding>:]<area>.<field>=<value>\n\t\t"
@@ -770,6 +778,55 @@ fieldopt_t arg_to_fieldopt(char * arg)
 	return opt;
 }
 
+static
+void set_area_offset_opt(fru_t * fru, const char * arg)
+{
+	char * copy = strdup(arg);
+	if (!copy) {
+		fatal("Out of memory");
+	}
+
+	char * saveptr = NULL;
+	char * token = strtok_r(copy, ",", &saveptr);
+
+	while (token) {
+		char * eq = strchr(token, '=');
+		if (!eq || eq == token || !eq[1]) {
+			fatal("Invalid --area-offset format '%s', expected <area>=<offset>[,...]", arg);
+		}
+
+		size_t area_len = (size_t)(eq - token);
+		char * end = NULL;
+		errno = 0;
+		uintmax_t offset = strtoumax(eq + 1, &end, 0);
+		if (errno || !end || end == eq + 1 || *end) {
+			fatal("Invalid offset '%s' in --area-offset argument '%s'",
+			      eq + 1, arg);
+		}
+
+		fru_area_type_t atype;
+		bool found = false;
+		FRU_FOREACH_AREA(atype) {
+			const char * const aname = area_names[atype].json;
+			if (strlen(aname) == area_len && !strncmp(token, aname, area_len)) {
+				fru->area_offset[atype] = (size_t)offset;
+				debug(2, "Set area %s to fixed offset %ju bytes", aname, offset);
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			fatal("Unknown area name '%.*s' in --area-offset argument '%s'",
+			      (int)area_len, token, arg);
+		}
+
+		token = strtok_r(NULL, ",", &saveptr);
+	}
+
+	free(copy);
+}
+
 void load_fromfile(const char * fname,
                    const struct frugen_config_s * config,
                    fru_t * fru)
@@ -1129,6 +1186,10 @@ int main(int argc, char * argv[])
 				}
 				break;
 
+			case 'O': // area-offset
+				set_area_offset_opt(fru, optarg);
+				break;
+
 			case 's': { // set field
 				/* We intentionally waste some memory on these sparse arrays
 				 * for the sake of data/code separation */
@@ -1237,6 +1298,8 @@ int main(int argc, char * argv[])
 	uint8_t *frubuf = NULL;
 	struct timeval orig_tv = fru->board.tv;
 	bool orig_tv_auto = fru->board.tv_auto;
+	size_t orig_area_offset[FRU_TOTAL_AREAS] = { 0 };
+	memcpy(orig_area_offset, fru->area_offset, sizeof(orig_area_offset));
 	if (!fru_savebuffer((void **)&frubuf, &fullsize, fru)) {
 		fru_fatal("Failed to encode the provided data");
 	}
@@ -1250,6 +1313,7 @@ int main(int argc, char * argv[])
 	}
 	fru->board.tv_auto = orig_tv_auto;
 	fru->board.tv = orig_tv;
+	memcpy(fru->area_offset, orig_area_offset, sizeof(orig_area_offset));
 
 	/* Generate the output */
 	if (optind >= argc)
