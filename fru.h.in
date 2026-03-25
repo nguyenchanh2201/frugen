@@ -598,6 +598,14 @@ typedef struct {
 	                                         *   order, please prefer using
 	                                         *   fru_move_area().
 	                                         */
+	size_t padding[FRU_TOTAL_AREAS]; /**< Additional bytes to reserve at
+	                                  *   the end of each area before final
+	                                  *   8-byte alignment.
+	                                  *
+	                                  *   This allows preallocating space for
+	                                  *   future updates while preserving the
+	                                  *   FRU binary format.
+	                                  */
 	char * internal; ///< Internal use area as a hex string
 	fru_chassis_t chassis; ///< The chassis information structure
 	fru_board_t board; ///< The board information structure
@@ -1738,4 +1746,3 @@ bool fru_set_internal_hexstring(fru_t * fru, const void * hexstr);
 bool fru_delete_internal(fru_t * fru);
 
 /** @} internal */
-

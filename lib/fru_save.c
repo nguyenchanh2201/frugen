@@ -274,6 +274,7 @@ bool encode_iu_area(void * area_out, size_t * size,
 {
 	fru__file_internal_t * internal = area_out;
 	size_t bytesize = 0;
+	size_t reserve = fru->padding[FRU_INTERNAL_USE];
 
 	if (!fru->internal) {
 		fru__seterr(FEGENERIC, FERR_LOC_INTERNAL, -1);
@@ -295,7 +296,7 @@ bool encode_iu_area(void * area_out, size_t * size,
 			return false;
 		}
 	}
-	*size = FRU__BLOCK_ALIGN(bytesize + sizeof(internal->ver));
+	*size = FRU__BLOCK_ALIGN(bytesize + sizeof(internal->ver) + reserve);
 	if (internal) {
 		// Ensure the unused tail of the area is not some garbage
 		memset(internal->data + bytesize, 0, *size - bytesize);
@@ -341,6 +342,7 @@ bool encode_info_area(void * area_out, size_t * size,
 	fru__file_area_t * file_area = area_out;
 	int info_atype = atype - FRU_FIRST_INFO_AREA;
 	fru__file_board_t * board = (fru__file_board_t *)area_out;
+	const size_t reserve = fru->padding[atype];
 	size_t bytes = 0; // Counter for the output area size in bytes,
 	                  // don't spoil *size until everything is
 	                  // known to be success
@@ -473,13 +475,19 @@ bool encode_info_area(void * area_out, size_t * size,
 #define CKSUMMED_SIZE (TERMINATED_SIZE + 1) // Account for the checksum byte
 #define PAD_OUTPTR (area_out + TERMINATED_SIZE) // Padding starts after the terminator
 	size_t padding_size;
-	padding_size = FRU__BLOCK_ALIGN(CKSUMMED_SIZE) - TERMINATED_SIZE;
+	padding_size = FRU__BLOCK_ALIGN(CKSUMMED_SIZE + reserve) - TERMINATED_SIZE;
 
 	/* Add the custom field list terminator, then add padding and checksum */
 	if (area_out) {
+		const size_t blocks = FRU__BLOCKS(CKSUMMED_SIZE + reserve);
+		if (blocks > UINT8_MAX) {
+			fru__seterr(FE2BIG, atype, -1);
+			return false;
+		}
+
 		fru__file_field_t * out_field = TERMINATOR_PTR;
 		out_field->typelen = FRU__FIELD_TERMINATOR;
-		file_area->blocks = FRU__BLOCKS(CKSUMMED_SIZE); // Round up to multiple of 8 bytes
+		file_area->blocks = (uint8_t)blocks; // Round up to multiple of 8 bytes
 		memset(PAD_OUTPTR, 0, padding_size);
 		int cksum = fru__calc_checksum(area_out, TERMINATED_SIZE + padding_size);
 		if (cksum < 0)
@@ -539,7 +547,7 @@ bool encode_mr_area(void * area_out, size_t * size,
 	}
 
 	/* The returned size is expected to be block-aligned */
-	*size = FRU__BYTES(FRU__BLOCKS(mr_size));
+	*size = FRU__BLOCK_ALIGN(mr_size + fru->padding[FRU_MR]);
 	return true;
 }
 
@@ -586,9 +594,15 @@ static bool create_frufile(fru__file_t * frufile, size_t * size, const fru_t * f
 			return false;
 
 		if (frufile) {
+			size_t offset_blocks = FRU__BLOCKS(area_out - outbuf);
+			if (offset_blocks > UINT8_MAX) {
+				fru__seterr(FE2BIG, type, -1);
+				return false;
+			}
+
 			// Save the current encoded area offset into the fru file header
 			uint8_t * frufile_hdr_offset = &frufile->internal + type;
-			*frufile_hdr_offset = FRU__BLOCKS(area_out - outbuf);
+			*frufile_hdr_offset = (uint8_t)offset_blocks;
 			// Adjust the output address for the next area (already block-aligned)
 			area_out += area_size;
 		}

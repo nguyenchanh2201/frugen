@@ -59,6 +59,9 @@ static const struct option options[] = {
 	/* Set the output data format */
 	{ .name = "out-format",    .val = 'o', .has_arg = required_argument },
 
+	/* Add reserved padding bytes to a specific area */
+	{ .name = "pad-area",      .val = 'p', .has_arg = required_argument },
+
 	/* Set input file format to raw binary */
 	{ .name = "raw",          .val = 'r', .has_arg = required_argument },
 
@@ -134,6 +137,10 @@ static const char * const option_help[] = {
 	        ".\n\t\t         Default format when writing to stdout"
 #endif
 	        ,
+	['p'] = "Reserve extra bytes at the end of an area before final\n\t\t"
+	        "8-byte alignment. Argument format: <area>=<bytes>.\n\t\t"
+	        "Area names: internal, chassis, board, product, multirecord, all.\n\t\t"
+	        "Bytes can be decimal or hex (for example 64 or 0x40).",
 	['r'] = "Load FRU information from a raw binary file, use '-' for stdin",
 	['s'] = "Set a text field in an area to the given value, use given encoding\n\t\t"
 	        "Requires an argument in form [<encoding>:]<area>.<field>=<value>\n\t\t"
@@ -770,6 +777,46 @@ fieldopt_t arg_to_fieldopt(char * arg)
 	return opt;
 }
 
+static
+void set_area_padding_opt(fru_t * fru, const char * arg)
+{
+	char * eq = strchr(arg, '=');
+	if (!eq || eq == arg || !eq[1]) {
+		fatal("Invalid --pad-area argument '%s', expected <area>=<bytes>", arg);
+	}
+
+	size_t area_len = (size_t)(eq - arg);
+	char * end = NULL;
+	errno = 0;
+	uintmax_t bytes = strtoumax(eq + 1, &end, 0);
+	if (errno || !end || end == eq + 1 || *end) {
+		fatal("Invalid padding byte count '%s' in --pad-area argument '%s'",
+		      eq + 1, arg);
+	}
+
+	if (area_len == 3 && !strncmp(arg, "all", area_len)) {
+		fru_area_type_t atype;
+		FRU_FOREACH_AREA(atype) {
+			fru->padding[atype] = (size_t)bytes;
+		}
+		debug(2, "Set extra padding for all areas to %ju bytes", bytes);
+		return;
+	}
+
+	fru_area_type_t atype;
+	FRU_FOREACH_AREA(atype) {
+		const char * const aname = area_names[atype].json;
+		if (strlen(aname) == area_len && !strncmp(arg, aname, area_len)) {
+			fru->padding[atype] = (size_t)bytes;
+			debug(2, "Set extra padding for area %s to %ju bytes", aname, bytes);
+			return;
+		}
+	}
+
+	fatal("Unknown area name '%.*s' in --pad-area argument '%s'",
+	      (int)area_len, arg, arg);
+}
+
 void load_fromfile(const char * fname,
                    const struct frugen_config_s * config,
                    fru_t * fru)
@@ -1128,6 +1175,9 @@ int main(int argc, char * argv[])
 				}
 				}
 				break;
+			case 'p':
+				set_area_padding_opt(fru, optarg);
+				break;
 
 			case 's': { // set field
 				/* We intentionally waste some memory on these sparse arrays
@@ -1237,6 +1287,8 @@ int main(int argc, char * argv[])
 	uint8_t *frubuf = NULL;
 	struct timeval orig_tv = fru->board.tv;
 	bool orig_tv_auto = fru->board.tv_auto;
+	size_t orig_padding[FRU_TOTAL_AREAS] = { 0 };
+	memcpy(orig_padding, fru->padding, sizeof(orig_padding));
 	if (!fru_savebuffer((void **)&frubuf, &fullsize, fru)) {
 		fru_fatal("Failed to encode the provided data");
 	}
@@ -1250,6 +1302,7 @@ int main(int argc, char * argv[])
 	}
 	fru->board.tv_auto = orig_tv_auto;
 	fru->board.tv = orig_tv;
+	memcpy(fru->padding, orig_padding, sizeof(orig_padding));
 
 	/* Generate the output */
 	if (optind >= argc)
