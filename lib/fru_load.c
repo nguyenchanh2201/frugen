@@ -351,9 +351,31 @@ bool decode_info_area(fru_t * fru,
 			return false;
 	}
 
-	fru_field_t * outfield;
-	FRU_FOREACH_INFOFIELD(fru, atype, outfield, i) {
-		if (!fru__decode_field(outfield, field)) {
+	fru_field_t * outfield[FRU_INFO_AREAS][FRU_MAX_FIELD_COUNT] = {
+		[FRU_INFOIDX(CHASSIS)] = {
+			&fru->chassis.pn,
+			&fru->chassis.serial,
+		},
+		[FRU_INFOIDX(BOARD)] = {
+			&fru->board.mfg,
+			&fru->board.pname,
+			&fru->board.serial,
+			&fru->board.pn,
+			&fru->board.file,
+		},
+		[FRU_INFOIDX(PRODUCT)] = {
+			&fru->product.mfg,
+			&fru->product.pname,
+			&fru->product.pn,
+			&fru->product.ver,
+			&fru->product.serial,
+			&fru->product.atag,
+			&fru->product.file,
+		}
+	};
+
+	for (size_t i = 0; i < fru__fieldcount[atype]; i++) {
+		if (!fru__decode_field(outfield[infoidx][i], field)) {
 			fru_errno.src = (fru_error_source_t)atype;
 			fru_errno.index = i;
 			return false;
